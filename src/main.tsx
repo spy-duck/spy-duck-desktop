@@ -12,7 +12,6 @@ import { createRoot } from "react-dom/client";
 import { ComposeContextProvider } from "foxact/compose-context-provider";
 import { BrowserRouter } from "react-router-dom";
 import { BaseErrorBoundary } from "./components/base";
-import Layout from "./pages/_layout";
 import "./services/i18n";
 import {
   LoadingCacheProvider,
@@ -20,6 +19,7 @@ import {
   UpdateStateProvider,
 } from "./services/states";
 import { AppDataProvider } from "./providers/app-data-provider";
+import App from "@/App";
 
 const mainElementId = "root";
 const container = document.getElementById(mainElementId);
@@ -55,7 +55,7 @@ root.render(
       <BaseErrorBoundary>
         <AppDataProvider>
           <BrowserRouter>
-            <Layout />
+            <App />
           </BrowserRouter>
         </AppDataProvider>
       </BaseErrorBoundary>

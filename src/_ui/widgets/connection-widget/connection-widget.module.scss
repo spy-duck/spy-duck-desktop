@@ -1,0 +1,46 @@
+.connection-widget {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  &-button {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 120px;
+    background-color: var(--grey);
+    color: var(--grey-700);
+    transition:
+      0.2s color,
+      0.2s background-color;
+    box-shadow: var(--shadow-sm) !important;
+
+    &:not(&--connected):hover {
+      background-color: var(--grey-600);
+      color: var(--grey-900);
+    }
+    &--connected:hover {
+      background-color: var(--green-400);
+      color: var(--grey-800);
+    }
+
+    img {
+      max-width: 80%;
+    }
+
+    &--connected {
+      background-color: var(--green);
+      color: var(--grey-900);
+    }
+  }
+}

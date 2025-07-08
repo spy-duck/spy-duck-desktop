@@ -1,0 +1,109 @@
+.icon {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: 50%;
+
+  svg {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    width: 1.1em;
+    height: 1em;
+
+    use {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &--tiny {
+    font-size: 0.5em;
+  }
+
+  &--small {
+    font-size: 0.75em;
+  }
+
+  &--big {
+    font-size: 1.25em;
+  }
+
+  &--large {
+    font-size: 1.5em;
+  }
+
+  &--huge {
+    font-size: 2em;
+  }
+
+  &.white {
+    color: var(--white);
+  }
+
+  &.red {
+    color: var(--red);
+  }
+
+  &.orange {
+    color: var(--orange);
+  }
+
+  &.yellow {
+    color: var(--yellow);
+  }
+
+  &.green {
+    color: var(--green);
+  }
+
+  &.teal {
+    color: var(--teal);
+  }
+
+  &.blue {
+    color: var(--blue);
+  }
+
+  &.violet {
+    color: var(--violet);
+  }
+
+  &.indigo {
+    color: var(--indigo);
+  }
+
+  &.pink {
+    color: var(--pink);
+  }
+
+  &.brown {
+    color: var(--brown);
+  }
+
+  &.grey {
+    color: var(--grey);
+  }
+
+  &.black {
+    color: var(--black);
+  }
+
+  &--rotate {
+    animation: spin 3s linear infinite;
+    -webkit-font-smoothing: antialiased;
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
+}

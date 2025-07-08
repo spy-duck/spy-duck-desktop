@@ -130,10 +130,15 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve("./src"),
+      "@ui": path.resolve("./src/_ui"),
       "@root": path.resolve("."),
     },
   },
   css: {
+    modules: {
+      generateScopedName: "[local]___[hash:base64:5]",
+      localsConvention: "dashesOnly",
+    },
     preprocessorOptions: {
       scss: {
         api: "modern-compiler",
