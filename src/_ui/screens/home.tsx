@@ -14,7 +14,7 @@ export function UIHomeScreen() {
           minHeight: "100vh",
         }}
       >
-        <div style={{ width: 300 }}>
+        <div style={{ width: 360 }}>
           <ProfilesWidget />
         </div>
         <div>

@@ -1,2 +1,61 @@
 .profiles-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  border-radius: 10px;
+  max-height: 100vh;
+  overflow: auto;
+  padding: 1.25rem 0.25em 1.25rem 1.25rem;
+  margin: -1rem 0;
+  -webkit-overflow-scrolling: touch;
+
+  //&::-webkit-scrollbar {
+  //  display: none;
+  //}
+
+  &-subscription-header {
+    display: flex;
+    flex-direction: row;
+    background-color: #f6f4f5;
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+
+    &-inner {
+      flex: 1;
+      padding: 9px 16px;
+    }
+
+    &-title {
+      font-weight: bold;
+    }
+
+    &-params {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 20px;
+      color: rgba(60, 60, 67, 0.6);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    button {
+      height: auto;
+      padding: 0.5em;
+      color: var(--grey);
+      transition: color 0.2s;
+      border: none !important;
+      background-color: transparent;
+      cursor: pointer;
+
+      &.last-child {
+        padding-right: 1em;
+      }
+
+      &:hover {
+        color: var(--grey-500);
+      }
+    }
+  }
 }

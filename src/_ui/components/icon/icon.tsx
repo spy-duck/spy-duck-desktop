@@ -21,7 +21,7 @@ export function Icon(props: IconProps): React.ReactElement {
         styles.icon,
         props.color,
         props.size,
-        props.rotate && "icon--rotate",
+        props.rotate && styles.iconRotate,
         props.className,
       )}
       style={props.style}

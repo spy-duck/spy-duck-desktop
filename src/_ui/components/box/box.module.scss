@@ -1,0 +1,10 @@
+.box {
+  padding: 24px;
+  border-radius: 10px;
+  background-color: var(--white);
+  box-shadow: var(--shadow);
+
+  &--no-padding {
+    padding: 0;
+  }
+}

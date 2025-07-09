@@ -1,9 +1,20 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, MouseEvent } from "react";
 import { useAppData } from "@/providers/app-data-provider";
 import { TProxyGroup } from "@ui/types/proxy";
 import { List, ListItem } from "@ui/components/list";
 import { deleteConnection, updateProxy } from "@/services/api";
 import { useVerge } from "@/hooks/use-verge";
+import styles from "./profiles-widget.module.scss";
+import { Box } from "@/_ui/components/box";
+import { useProfiles } from "@/hooks/use-profiles";
+import { DateTime } from "luxon";
+import { FORMAT } from "@ui/consts";
+import { formatTraffic } from "@/_ui/utils/format-traffic";
+import { isNumber } from "lodash-es";
+import { Icon } from "@/_ui/components/icon";
+import { updateProfile } from "@/services/cmds";
+import { showNotice } from "@/services/noticeService";
+import { useTranslation } from "react-i18next";
 
 const STORAGE_KEY_GROUP = "clash-verge-selected-proxy-group";
 const STORAGE_KEY_PROXY = "clash-verge-selected-proxy";
@@ -13,6 +24,11 @@ type ProfilesWidgetProps = {};
 export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
   const { verge } = useVerge();
   const { proxies, connections, refreshProxy } = useAppData();
+  const {
+    current,
+  }: {
+    current: IProfileItem | undefined;
+  } = useProfiles();
 
   const [selectedProxyGroup, setSelectedProxyGroup] = useState(() => {
     return localStorage.getItem(STORAGE_KEY_GROUP);
@@ -75,26 +91,33 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
   }
 
   const groups = useMemo(() => {
-    return proxies?.groups || [];
+    return (proxies?.groups || []).filter(
+      (group: TProxyGroup) => !group.hidden,
+    );
   }, [proxies?.groups]);
 
   return (
-    <>
-      <div>
+    <div className={styles.profilesWidget}>
+      <Box noPadding>
+        <SubscriptionHeader current={current} />
         {groups.map((group: TProxyGroup, i: number) => (
           <div key={i}>
-            {groups.length > 1 && (
-              <div
-                style={{
-                  marginLeft: "1em",
-                  marginBottom: "0.5em",
-                  color: "var(--blue)",
-                }}
-              >
-                {group.name}
-              </div>
-            )}
-            <List>
+            <List attached>
+              {groups.length > 1 && (
+                <div
+                  style={{
+                    paddingLeft: "1em",
+                    paddingBottom: "1em",
+                    color: "var(--blue)",
+                    paddingTop: "1em",
+                    background: "var(--grey-100)",
+                    borderTop: "1px solid var(--grey-200)",
+                    borderBottom: "1px solid var(--grey-200)",
+                  }}
+                >
+                  {group.name}
+                </div>
+              )}
               {group.all.map((proxy) => (
                 <ListItem
                   key={proxy.id}
@@ -103,7 +126,8 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
                     proxy.name === selectedProxy
                   }
                   onClick={
-                    proxy.name !== group.now
+                    group.name !== selectedProxyGroup ||
+                    proxy.name !== selectedProxy
                       ? handlerClickProxy(group.name, proxy.name)
                       : undefined
                   }
@@ -114,7 +138,67 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
             </List>
           </div>
         ))}
+      </Box>
+    </div>
+  );
+}
+
+function SubscriptionHeader({
+  current,
+}: {
+  current: IProfileItem | undefined;
+}) {
+  const { t } = useTranslation();
+  const [isPending, setIsPending] = useState(false);
+
+  async function handlerClickUpdateProfile(e: MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (!current) {
+      return;
+    }
+    setIsPending(true);
+    try {
+      await updateProfile(current.uid, current.option);
+      showNotice("success", t("Update subscription successfully"), 1000);
+    } finally {
+      setTimeout(() => setIsPending(false), 500);
+    }
+  }
+
+  return (
+    <header className={styles.profilesWidgetSubscriptionHeader}>
+      <div className={styles.profilesWidgetSubscriptionHeaderInner}>
+        <div className={styles.profilesWidgetSubscriptionHeaderTitle}>
+          {current?.name}
+        </div>
+        <div className={styles.profilesWidgetSubscriptionHeaderParams}>
+          <div>
+            Истекает:{" "}
+            {current?.extra?.expire
+              ? DateTime.fromSeconds(current.extra.expire).toFormat(
+                  FORMAT.DATETIME,
+                )
+              : "-"}
+          </div>
+          {isNumber(current?.extra?.total) && (
+            <div>
+              {formatTraffic(current?.extra.download || 0)}/
+              {formatTraffic(current?.extra.total || 0)}
+            </div>
+          )}
+        </div>
       </div>
-    </>
+      <button onClick={handlerClickUpdateProfile} disabled={isPending}>
+        <Icon name="arrow-rotate-right" rotate={isPending} />
+      </button>
+      <button
+        className="last-child"
+        onClick={() => {
+          alert("Menu");
+        }}
+      >
+        <Icon name="chevron-right" />
+      </button>
+    </header>
   );
 }
