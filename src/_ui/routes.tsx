@@ -6,4 +6,8 @@ export const UIRoutes: RouteObject[] = [
     path: "/home",
     element: <UIHomeScreen />,
   },
+  {
+    path: "*",
+    element: <UIHomeScreen />,
+  },
 ];

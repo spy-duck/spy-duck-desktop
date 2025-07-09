@@ -1,9 +1,26 @@
 import { ConnectionWidget } from "@ui/widgets/connection-widget";
+import { ProfilesWidget } from "@ui/widgets/profiles-widget";
 
 export function UIHomeScreen() {
   return (
     <>
-      <ConnectionWidget />
+      <div
+        style={{
+          display: "flex",
+          gap: 14,
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+          minHeight: "100vh",
+        }}
+      >
+        <div style={{ width: 300 }}>
+          <ProfilesWidget />
+        </div>
+        <div>
+          <ConnectionWidget />
+        </div>
+      </div>
     </>
   );
 }

@@ -1,0 +1,145 @@
+.list {
+  $list: &;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 10px;
+  background-color: #fff;
+
+  &--attached {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+
+    & > #{$list}-item:first-child {
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0 !important;
+    }
+  }
+
+  &-item {
+    $item: &;
+
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    position: relative;
+    list-style: none;
+    margin: 0;
+    background-color: #fff;
+    transition: background-color 0.2s;
+
+    &:after {
+      position: absolute;
+      bottom: 0;
+      left: 1rem;
+      right: 1rem;
+      content: "";
+      height: 1px;
+      background-color: rgba(#545458, 0.29);
+      transition: opacity 0.2s;
+    }
+
+    &:last-child:after {
+      opacity: 0;
+    }
+
+    &--clickable {
+      button {
+        cursor: pointer;
+      }
+
+      &:not(#{$item}--current):hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+
+      &:has(+ #{$item}:hover) {
+        &:after {
+          opacity: 0;
+        }
+      }
+
+      &:hover:after {
+        opacity: 0;
+      }
+    }
+
+    &:first-child {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    &--current {
+      background:
+        linear-gradient(
+          0deg,
+          rgba(10, 130, 255, 0.75),
+          rgba(10, 130, 255, 0.75)
+        ),
+        #0a82ff;
+      background-blend-mode: normal, soft-light;
+
+      & > #{$item}-inner > #{$item}-title,
+      & .context-button {
+        color: #fff;
+      }
+
+      & > #{$item}-inner > #{$item}-subtitle {
+        color: rgba(#fff, 0.75);
+      }
+
+      &:after {
+        opacity: 0;
+      }
+    }
+
+    &:has(+ #{$item}--current) {
+      &:after {
+        opacity: 0;
+      }
+    }
+
+    &-inner {
+      flex: 1;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      text-align: left;
+      padding: 0.5rem 1rem;
+    }
+
+    &-title {
+      display: block;
+      font-size: 15px;
+      line-height: 22px;
+    }
+
+    &.red &-title {
+      color: var(--red);
+    }
+
+    &-subtitle {
+      display: block;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 20px;
+      color: rgba(60, 60, 67, 0.6);
+    }
+
+    &-context-button {
+      height: auto;
+      padding: 1em;
+      color: var(--grey);
+      transition: color 0.2s;
+
+      &:hover {
+        color: var(--grey-500);
+      }
+    }
+  }
+}
