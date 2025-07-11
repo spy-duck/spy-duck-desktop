@@ -1,6 +1,6 @@
 export const FORMAT = {
-  DATETIME: "dd.MM.yyyy HH:mm",
-  DATETIME_FULL: "dd.MM.yyyy HH:mm:ss",
-  DATE: "dd.MM.yyyy",
+  DATETIME: "DD.MM.YYYY HH:mm",
+  DATETIME_FULL: "DD.MM.YYYY HH:mm:ss",
+  DATE: "DD.MM.YYYY",
   TIME: "HH:mm",
 };

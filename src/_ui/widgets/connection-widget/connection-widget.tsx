@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "@ui/components/icon";
 import { getRunningMode } from "@/services/cmds";
 import { mutate } from "swr";
+import { useConnectionState } from "@ui/state/connection";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
@@ -18,6 +19,9 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
   const { verge, patchVerge, mutateVerge } = useVerge();
   const { isAdminMode } = useSystemState();
   const { t } = useTranslation();
+  const changeConnectionState = useConnectionState(
+    (state) => state.changeConnectionState,
+  );
 
   const { enable_system_proxy, enable_tun_mode } = verge ?? {};
   const [localServiceOk, setLocalServiceOk] = useState(false);
@@ -44,6 +48,9 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     updateLocalStatus().then(() => {
       console.debug("TUN status updated");
     });
+    changeConnectionState(
+      enable_system_proxy || enable_tun_mode ? "connected" : "disconnected",
+    );
   }, []);
 
   async function updateProxyState(
@@ -56,10 +63,19 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
 
   async function toggleConnection(e: MouseEvent) {
     e.preventDefault();
+    const isConnecting = !enable_system_proxy && !enable_tun_mode;
+    console.log({
+      enable_system_proxy,
+      enable_tun_mode,
+    });
+    if (isConnecting) {
+      changeConnectionState("connecting");
+    }
     await updateProxyState({
       enable_system_proxy: systemProxyType === "system" && !enable_system_proxy,
       enable_tun_mode: systemProxyType === "tun" && !enable_tun_mode,
     });
+    changeConnectionState(isConnecting ? "connected" : "disconnected");
   }
 
   async function toggleSystemProxyType(e: ChangeEvent<HTMLInputElement>) {

@@ -40,6 +40,7 @@
   --grey-900: #{color.scale(#bbbbbd, $lightness: -75%)};
 
   --blue: #0a84ff;
+  --blue-500: --blue;
   --blue-600: #{color.scale(#0a84ff, $lightness: -20%)};
 
   --green: #34c759;
@@ -73,6 +74,7 @@
   line-height: 1.4;
 
   color: #0f0f0f;
+  background-color: #e0e0e0;
 
   &-header {
   }

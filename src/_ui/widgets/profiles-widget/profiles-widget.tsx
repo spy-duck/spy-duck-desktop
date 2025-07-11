@@ -7,7 +7,6 @@ import { useVerge } from "@/hooks/use-verge";
 import styles from "./profiles-widget.module.scss";
 import { Box } from "@/_ui/components/box";
 import { useProfiles } from "@/hooks/use-profiles";
-import { DateTime } from "luxon";
 import { FORMAT } from "@ui/consts";
 import { formatTraffic } from "@/_ui/utils/format-traffic";
 import { isNumber } from "lodash-es";
@@ -15,6 +14,8 @@ import { Icon } from "@/_ui/components/icon";
 import { updateProfile } from "@/services/cmds";
 import { showNotice } from "@/services/noticeService";
 import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
+import { intervalPromise } from "@ui/utils/interval-promise";
 
 const STORAGE_KEY_GROUP = "clash-verge-selected-proxy-group";
 const STORAGE_KEY_PROXY = "clash-verge-selected-proxy";
@@ -120,7 +121,7 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
               )}
               {group.all.map((proxy) => (
                 <ListItem
-                  key={proxy.id}
+                  key={i + proxy.id}
                   current={
                     group.name === selectedProxyGroup &&
                     proxy.name === selectedProxy
@@ -158,10 +159,10 @@ function SubscriptionHeader({
     }
     setIsPending(true);
     try {
-      await updateProfile(current.uid, current.option);
+      await intervalPromise(updateProfile(current.uid, current.option), 2000);
       showNotice("success", t("Update subscription successfully"), 1000);
     } finally {
-      setTimeout(() => setIsPending(false), 500);
+      setIsPending(false);
     }
   }
 
@@ -175,9 +176,7 @@ function SubscriptionHeader({
           <div>
             Истекает:{" "}
             {current?.extra?.expire
-              ? DateTime.fromSeconds(current.extra.expire).toFormat(
-                  FORMAT.DATETIME,
-                )
+              ? dayjs.unix(current.extra.expire).format(FORMAT.DATETIME)
               : "-"}
           </div>
           {isNumber(current?.extra?.total) && (
