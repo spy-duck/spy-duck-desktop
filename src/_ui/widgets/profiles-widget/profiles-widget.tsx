@@ -76,6 +76,7 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
 
         setTimeout(async () => {
           await refreshProxy();
+          window.dispatchEvent(new CustomEvent("changed-proxy"));
         }, 500);
       } catch (err) {
         setSelectedProxyGroup(previousProxyGroup);

@@ -64,10 +64,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
   async function toggleConnection(e: MouseEvent) {
     e.preventDefault();
     const isConnecting = !enable_system_proxy && !enable_tun_mode;
-    console.log({
-      enable_system_proxy,
-      enable_tun_mode,
-    });
+
     if (isConnecting) {
       changeConnectionState("connecting");
     }
@@ -109,36 +106,41 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
       >
         <Icon name="power-off" />
       </button>
-      <div>
-        <label>
-          {t("System Proxy")}
-          <input
-            type="radio"
-            name="system_proxy_type"
-            value="system"
-            onChange={toggleSystemProxyType}
-            checked={systemProxyType === "system"}
-          />
-        </label>
+      <div className={styles.connectionWidgetProxySwitcher}>
+        <div className={styles.connectionWidgetProxySwitcherLabel}>
+          Режим работы
+          <div className={styles.connectionWidgetProxySwitcherLabelPopup}>
+            <Icon name="circle-info" />
+            <p style={{ maxWidth: 300 }}>
+              {systemProxyType === "system"
+                ? t("System Proxy Info")
+                : t("TUN Mode Intercept Info")}
+            </p>
+          </div>
+        </div>
+        <div className={styles.connectionWidgetProxySwitcherVariants}>
+          <label>
+            {t("System Proxy")}
+            <input
+              type="radio"
+              name="system_proxy_type"
+              value="system"
+              onChange={toggleSystemProxyType}
+              checked={systemProxyType === "system"}
+            />
+          </label>
 
-        <br />
-        <br />
-
-        <label>
-          {t("Tun Mode")}
-          <input
-            type="radio"
-            name="system_proxy_type"
-            value="tun"
-            onChange={toggleSystemProxyType}
-            checked={systemProxyType === "tun"}
-          />
-        </label>
-        <p style={{ maxWidth: 300 }}>
-          {systemProxyType === "system"
-            ? t("System Proxy Info")
-            : t("TUN Mode Intercept Info")}
-        </p>
+          <label>
+            {t("Tun Mode")}
+            <input
+              type="radio"
+              name="system_proxy_type"
+              value="tun"
+              onChange={toggleSystemProxyType}
+              checked={systemProxyType === "tun"}
+            />
+          </label>
+        </div>
       </div>
     </div>
   );

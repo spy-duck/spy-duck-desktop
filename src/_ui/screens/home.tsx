@@ -18,7 +18,17 @@ export function UIHomeScreen() {
         <div style={{ width: 360 }}>
           <ProfilesWidget />
         </div>
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 28,
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "100vh",
+            padding: "0 24px",
+          }}
+        >
           <ConnectionWidget />
           <div>
             <IpInfoWidget />

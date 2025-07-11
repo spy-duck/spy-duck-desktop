@@ -33,6 +33,8 @@
   --grey: #bbbbbd;
   --grey-100: #{color.scale(#bbbbbd, $lightness: 90%)};
   --grey-200: #{color.scale(#bbbbbd, $lightness: 75%)};
+  --grey-300: #{color.scale(#bbbbbd, $lightness: 50%)};
+  --grey-400: #{color.scale(#bbbbbd, $lightness: 20%)};
   --grey-500: --grey;
   --grey-600: #{color.scale(#bbbbbd, $lightness: -20%)};
   --grey-700: #{color.scale(#bbbbbd, $lightness: -35%)};

@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./ip-info-widget.module.scss";
 import { getIpInfo } from "@/services/api";
 import { Box } from "@/_ui/components/box";
 import { Icon } from "@/_ui/components/icon";
 import { useConnectionState } from "@ui/state/connection";
 import { useMutation, keepPreviousData } from "@tanstack/react-query";
+import { intervalPromise } from "@ui/utils/interval-promise";
+import * as Flags from "country-flag-icons/react/1x1";
 
 const IP_REFRESH_SECONDS = 300;
 
@@ -13,45 +15,66 @@ type IpInfo = Awaited<ReturnType<typeof getIpInfo>>;
 type IpInfoWidgetProps = {};
 
 export function IpInfoWidget({}: IpInfoWidgetProps): React.ReactElement {
+  const ref = useRef<NodeJS.Timeout | undefined>(undefined);
   const connectionState = useConnectionState((state) => state.connectionState);
-  const [ ipInfo, setIpInfo ] = useState<IpInfo>({} as any);
+  const [ipInfo, setIpInfo] = useState<IpInfo>({} as any);
   const { isPending, mutate } = useMutation({
-    mutationFn: () => getIpInfo(),
+    mutationFn: () => {
+      clearTimeout(ref.current);
+      return intervalPromise(getIpInfo(), 2000);
+    },
     onSuccess: (data) => {
       setIpInfo(data);
-      setTimeout(mutate, 5 * 1000);
+      ref.current = setTimeout(mutate, 3 * 60 * 1000);
     },
   });
 
   useEffect(() => {
     mutate();
+
+    function changeProxyListener() {
+      setTimeout(() => mutate(), 1000);
+    }
+
+    window.addEventListener("changed-proxy", changeProxyListener);
+    return () => {
+      window.removeEventListener("changed-proxy", changeProxyListener);
+    };
   }, [mutate]);
 
   useEffect(() => {
     if (["connected", "disconnected"].includes(connectionState)) {
-      setTimeout(() => mutate(), 2000);
+      setTimeout(() => mutate(), 5000);
     }
   }, [connectionState, mutate]);
+
+  const Flag = Flags[ipInfo?.country_code?.toUpperCase() as keyof typeof Flags];
 
   return (
     <Box noPadding>
       <div className={styles.ipInfoWidget}>
-        <div className={styles.ipInfoWidgetRows}>
-          <div>{ipInfo?.ip || "-"}</div>
-          <small>{ipInfo?.country || "-"}</small>
-        </div>
+        {Flag && (
+          <div className={styles.ipInfoWidgetFlag}>
+            <div className={styles.ipInfoWidgetFlagInset}>
+              <Flag title={ipInfo?.country} className="" />
+            </div>
+          </div>
+        )}
+        {ipInfo?.ip && (
+          <div className={styles.ipInfoWidgetRows}>
+            <div>{ipInfo?.ip || "-"}</div>
+            <small>{ipInfo?.country || "-"}</small>
+          </div>
+        )}
         <div>
           <button
             className={styles.ipInfoWidgetRefresh}
             onClick={async () => {
               mutate();
             }}
+            disabled={isPending}
           >
-            <Icon
-              name="arrow-rotate-right"
-              type="regular"
-              rotate={isPending}
-            />
+            <Icon name="arrow-rotate-right" type="regular" rotate={isPending} />
           </button>
         </div>
       </div>
