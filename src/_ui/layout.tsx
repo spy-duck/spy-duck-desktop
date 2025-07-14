@@ -2,7 +2,7 @@ import React from "react";
 import { useRoutes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UIRoutes } from "@ui/routes";
-import { BaseErrorBoundary } from "@/components/base";
+import { BaseErrorBoundary, NoticeManager } from "@/components/base";
 import { SvgSprite } from "@ui/components/svg-sprite";
 import { useInitApp } from "@ui/hooks/use-init-app";
 import styles from "./layout.module.scss";
@@ -20,6 +20,7 @@ export function UILayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <NoticeManager />
       <div className={styles.layout}>
         <div className={styles.layoutHeader}></div>
         <div className={styles.layoutContent}>

@@ -35,6 +35,13 @@
       color: var(--grey-800);
     }
 
+    &[disabled] {
+      background-color: var(--grey-600);
+      color: var(--grey-900);
+      opacity: 0.5;
+      cursor: default;
+    }
+
     img {
       max-width: 80%;
     }
@@ -124,6 +131,21 @@
           left: -9999px;
         }
       }
+    }
+  }
+
+  &-installation-message {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    align-items: center;
+    padding: 1em;
+    border: 1px solid var(--black);
+    border-radius: 10px;
+
+    &-icon {
+      font-size: 36px;
+      line-height: 1;
     }
   }
 }

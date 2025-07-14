@@ -5,9 +5,13 @@ import styles from "./connection-widget.module.scss";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@ui/components/icon";
-import { getRunningMode } from "@/services/cmds";
-import { mutate } from "swr";
+import { getRunningMode, installService } from "@/services/cmds";
+import useSWR, { mutate } from "swr";
 import { useConnectionState } from "@ui/state/connection";
+import { useServiceInstaller } from "@/hooks/useServiceInstaller";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useServiceControls } from "@ui/hooks/use-service-controls";
+import { intervalPromise } from "@ui/utils/interval-promise";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
@@ -16,28 +20,53 @@ type TSystemProxy = "system" | "tun";
 type ConnectionButtonProps = {};
 
 export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement {
-  const { verge, patchVerge, mutateVerge } = useVerge();
-  const { isAdminMode } = useSystemState();
   const { t } = useTranslation();
+  const { verge, patchVerge, mutateVerge } = useVerge();
+  const { isAdminMode, isServiceMode } = useSystemState();
+  const { installServiceAndRestartCore } = useServiceInstaller();
+  const { installService: installServiceAction, uninstallService } =
+    useServiceControls();
+
   const changeConnectionState = useConnectionState(
     (state) => state.changeConnectionState,
   );
 
   const { enable_system_proxy, enable_tun_mode } = verge ?? {};
-  const [localServiceOk, setLocalServiceOk] = useState(false);
+
   const [systemProxyType, setSystemProxyType] = useState<TSystemProxy>(
     () =>
       (localStorage.getItem(LOCAL_STORAGE_TAB_KEY) as TSystemProxy | null) ||
       "system",
   );
 
-  const isTunAvailable = localServiceOk || isAdminMode;
+  const { data: runningMode, refetch: refetchRunningMode } = useQuery({
+    queryKey: ["runningMode"],
+    queryFn: () => getRunningMode(),
+  });
+
+  const { mutate: installService, isPending: isPendingInstallService } =
+    useMutation({
+      mutationKey: ["runningMode"],
+      mutationFn: () => installServiceAction(),
+      onSuccess: async (success) => {
+        if (success) {
+          console.log("Service installed and restarted successfully");
+          await refetchRunningMode();
+          await updateProxyState({
+            enable_system_proxy: false,
+            enable_tun_mode: true,
+          });
+          changeConnectionState("connected");
+        }
+      },
+    });
+
+  const isTunAvailable = isServiceMode || isAdminMode;
 
   const updateLocalStatus = async () => {
     try {
       const runningMode = await getRunningMode();
       const serviceStatus = runningMode === "Service";
-      setLocalServiceOk(serviceStatus);
       await mutate("isServiceAvailable", serviceStatus, false);
     } catch (error) {
       console.error("Failed to update TUN status:", error);
@@ -53,13 +82,23 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     );
   }, []);
 
-  async function updateProxyState(
-    proxyState: Pick<IVergeConfig, "enable_system_proxy" | "enable_tun_mode">,
-  ) {
-    await mutateVerge({ ...verge, ...proxyState }, false);
-
-    await patchVerge(proxyState);
-  }
+  const { mutateAsync: updateProxyState, isPending: isPendingConnecting } =
+    useMutation({
+      mutationFn: async (
+        proxyState: Pick<
+          IVergeConfig,
+          "enable_system_proxy" | "enable_tun_mode"
+        >,
+      ) => {
+        await intervalPromise(
+          (async () => {
+            await mutateVerge({ ...verge, ...proxyState }, false);
+            await patchVerge(proxyState);
+          })(),
+          5000,
+        );
+      },
+    });
 
   async function toggleConnection(e: MouseEvent) {
     e.preventDefault();
@@ -68,11 +107,21 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     if (isConnecting) {
       changeConnectionState("connecting");
     }
-    await updateProxyState({
-      enable_system_proxy: systemProxyType === "system" && !enable_system_proxy,
-      enable_tun_mode: systemProxyType === "tun" && !enable_tun_mode,
-    });
-    changeConnectionState(isConnecting ? "connected" : "disconnected");
+
+    if (
+      isConnecting &&
+      systemProxyType === "tun" &&
+      (isSidecarMode || !isTunAvailable)
+    ) {
+      installService();
+    } else {
+      await updateProxyState({
+        enable_system_proxy:
+          systemProxyType === "system" && !enable_system_proxy,
+        enable_tun_mode: systemProxyType === "tun" && !enable_tun_mode,
+      });
+      changeConnectionState(isConnecting ? "connected" : "disconnected");
+    }
   }
 
   async function toggleSystemProxyType(e: ChangeEvent<HTMLInputElement>) {
@@ -94,6 +143,8 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     }
   }
 
+  const isSidecarMode = runningMode === "Sidecar";
+
   return (
     <div className={styles.connectionWidget}>
       <button
@@ -103,9 +154,27 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
             styles.connectionWidgetButtonConnected,
         )}
         onClick={toggleConnection}
+        disabled={isPendingConnecting || isPendingInstallService}
       >
         <Icon name="power-off" />
       </button>
+      isPendingConnecting: {String(isPendingConnecting)} <br />
+      isPendingInstallService: {String(isPendingInstallService)} <br />
+      isSidecarMode: {String(isSidecarMode)}
+      {!isSidecarMode && (
+        <button onClick={() => uninstallService()}>uninstall</button>
+      )}
+      {isPendingInstallService && (
+        <div className={styles.connectionWidgetInstallationMessage}>
+          <div className={styles.connectionWidgetInstallationMessageIcon}>
+            <Icon name="gear" rotate />
+          </div>
+          <div>
+            Устанавливается и настраивается системный сервис. <br />
+            Это может занять некоторое время.
+          </div>
+        </div>
+      )}
       <div className={styles.connectionWidgetProxySwitcher}>
         <div className={styles.connectionWidgetProxySwitcherLabel}>
           Режим работы
@@ -127,17 +196,19 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               value="system"
               onChange={toggleSystemProxyType}
               checked={systemProxyType === "system"}
+              disabled={isPendingConnecting || isPendingInstallService}
             />
           </label>
 
           <label>
-            {t("Tun Mode")}
+            VPN сервис
             <input
               type="radio"
               name="system_proxy_type"
               value="tun"
               onChange={toggleSystemProxyType}
               checked={systemProxyType === "tun"}
+              disabled={isPendingConnecting || isPendingInstallService}
             />
           </label>
         </div>
