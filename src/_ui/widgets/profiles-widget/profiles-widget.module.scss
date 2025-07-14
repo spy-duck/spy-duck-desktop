@@ -1,4 +1,5 @@
 .profiles-widget {
+  $widget: &;
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -56,6 +57,24 @@
       &:hover {
         color: var(--grey-500);
       }
+    }
+  }
+
+  &-proxy {
+    display: flex;
+
+    &-name {
+      flex: 1;
+    }
+
+    &-delay {
+      font-size: 0.75em;
+      padding: 0 0.5em;
+      background-color: var(--white);
+      border-radius: 4px;
+      border: none;
+      outline: none;
+      text-align: right;
     }
   }
 }

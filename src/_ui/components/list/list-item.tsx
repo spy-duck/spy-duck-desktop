@@ -1,6 +1,6 @@
 import { ComponentProps, MouseEventHandler, ReactNode } from "react";
 import { ContextMenuItem } from "@ui/components/list/list-item-context.menu";
-import clsx from "clsx";
+import clsx, { ClassValue } from "clsx";
 import styles from "./list.module.scss";
 
 type ListItemProps = {
@@ -11,10 +11,12 @@ type ListItemProps = {
   current?: boolean;
   contextMenuItems?: ContextMenuItem[];
   color?: undefined | "red";
+  className?: ClassValue;
 };
 
 export function ListItem({
   children,
+  className,
   current,
   color,
   onClick,
@@ -26,6 +28,7 @@ export function ListItem({
     <li
       className={clsx(
         styles.listItem,
+        className,
         current && styles.listItemCurrent,
         color,
         !!onClick && styles.listItemClickable,

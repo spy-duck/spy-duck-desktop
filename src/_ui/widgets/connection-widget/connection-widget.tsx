@@ -5,10 +5,9 @@ import styles from "./connection-widget.module.scss";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@ui/components/icon";
-import { getRunningMode, installService } from "@/services/cmds";
-import useSWR, { mutate } from "swr";
+import { getRunningMode } from "@/services/cmds";
+import { mutate } from "swr";
 import { useConnectionState } from "@ui/state/connection";
-import { useServiceInstaller } from "@/hooks/useServiceInstaller";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServiceControls } from "@ui/hooks/use-service-controls";
 import { intervalPromise } from "@ui/utils/interval-promise";
@@ -23,9 +22,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
   const { t } = useTranslation();
   const { verge, patchVerge, mutateVerge } = useVerge();
   const { isAdminMode, isServiceMode } = useSystemState();
-  const { installServiceAndRestartCore } = useServiceInstaller();
-  const { installService: installServiceAction, uninstallService } =
-    useServiceControls();
+  const { installService: installServiceAction } = useServiceControls();
 
   const changeConnectionState = useConnectionState(
     (state) => state.changeConnectionState,
@@ -95,7 +92,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
             await mutateVerge({ ...verge, ...proxyState }, false);
             await patchVerge(proxyState);
           })(),
-          5000,
+          4000,
         );
       },
     });
@@ -156,14 +153,9 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
         onClick={toggleConnection}
         disabled={isPendingConnecting || isPendingInstallService}
       >
-        <Icon name="power-off" />
+        <Icon name="power-off" rotate={isPendingConnecting} />
       </button>
-      isPendingConnecting: {String(isPendingConnecting)} <br />
-      isPendingInstallService: {String(isPendingInstallService)} <br />
-      isSidecarMode: {String(isSidecarMode)}
-      {!isSidecarMode && (
-        <button onClick={() => uninstallService()}>uninstall</button>
-      )}
+
       {isPendingInstallService && (
         <div className={styles.connectionWidgetInstallationMessage}>
           <div className={styles.connectionWidgetInstallationMessageIcon}>

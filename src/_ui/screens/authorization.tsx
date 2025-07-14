@@ -13,6 +13,7 @@ import { useAuthorizationState } from "@ui/state/authorization";
 import { useProfiles } from "@/hooks/use-profiles";
 import { sha256 } from "@ui/utils/sha256";
 import { axiosClient } from "@ui/utils/api-fetch";
+import { Icon } from "../components/icon";
 
 const BOT_URL =
   import.meta.env.MODE === "development"
@@ -140,6 +141,7 @@ export function AuthorizationScreen() {
     <div>
       <h1>Нужно авторизоваться</h1>
       <UIButton onClick={handlerClickAuth} disabled={isPending}>
+        <Icon name="paper-plane" type="solid" style={{ marginRight: 14 }} />
         Авторизоваться
       </UIButton>
       <div style={{ whiteSpace: "pre-wrap" }}>
