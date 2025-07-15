@@ -13,17 +13,14 @@ import { useAuthorizationState } from "@ui/state/authorization";
 import { useProfiles } from "@/hooks/use-profiles";
 import { sha256 } from "@ui/utils/sha256";
 import { axiosClient } from "@ui/utils/api-fetch";
-import { Icon } from "../components/icon";
+import { Icon } from "@ui/components/icon";
+import LogoPNG from "@ui/assets/images/icon-512.png";
+import styles from "./authorization.module.scss";
 
 const BOT_URL =
   import.meta.env.MODE === "development"
     ? "https://t.me/vpn_share_online_bot"
     : "https://t.me/spy_duck_vpn_bot";
-
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:8090/api/desktop-app"
-    : "https://spy-duck.com/api/desktop-app";
 
 export function AuthorizationScreen() {
   const ref = useRef({
@@ -132,26 +129,20 @@ export function AuthorizationScreen() {
           sysInfo?.systemVersion,
           sysInfo?.kernelVersion,
           sysInfo?.arch,
+          systemHostname,
         ].join(":"),
       ),
     });
   }
 
   return (
-    <div>
+    <div className={styles.authorization}>
+      <img className={styles.authorizationLogo} src={LogoPNG} alt="Logo" />
       <h1>Нужно авторизоваться</h1>
       <UIButton onClick={handlerClickAuth} disabled={isPending}>
         <Icon name="paper-plane" type="solid" style={{ marginRight: 14 }} />
         Авторизоваться
       </UIButton>
-      <div style={{ whiteSpace: "pre-wrap" }}>
-        platform: {sysInfo?.platform} <br />
-        systemVersion: {sysInfo?.systemVersion} <br />
-        kernelVersion: {sysInfo?.kernelVersion} <br />
-        arch: {sysInfo?.arch} <br />
-        vergeVersion: {sysInfo?.vergeVersion} <br />
-        systemHostname: {systemHostname} <br />
-      </div>
     </div>
   );
 }

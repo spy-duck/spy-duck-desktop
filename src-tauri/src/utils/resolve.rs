@@ -342,7 +342,7 @@ pub fn create_window(is_show: bool) -> bool {
         "main", /* the unique window label */
         tauri::WebviewUrl::App("index.html".into()),
     )
-    .title("Clash Verge")
+    .title("Spy Duck VPN")
     .center()
     .decorations(true)
     .fullscreen(false)
