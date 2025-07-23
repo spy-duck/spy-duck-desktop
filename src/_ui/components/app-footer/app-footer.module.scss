@@ -1,0 +1,54 @@
+.app-footer {
+  width: 100%;
+  background-color: var(--grey-900);
+  color: var(--white);
+
+  &-inner {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+    padding: 0 1em;
+    max-width: 768px;
+    margin: 0 auto;
+  }
+}
+
+.traffic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+
+  &-chart {
+    padding: 0.5em 0;
+    transition: max-width 1s;
+    width: 120px;
+    height: 48px;
+    max-width: 0;
+    overflow: hidden;
+
+    canvas {
+      width: 120px;
+      height: 48px;
+    }
+
+    &--visible {
+      max-width: 100%;
+    }
+  }
+
+  &-stats {
+    display: flex;
+    gap: 0.5em;
+    padding: 1em;
+
+    &-digit {
+      width: 40px;
+      text-align: right;
+    }
+
+    &-unit {
+      width: 30px;
+    }
+  }
+}

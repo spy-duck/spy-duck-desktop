@@ -12,7 +12,6 @@ export function UIHomeScreen() {
           alignItems: "center",
           justifyContent: "center",
           flex: 1,
-          minHeight: "100vh",
         }}
       >
         <div style={{ width: 360 }}>
@@ -25,7 +24,6 @@ export function UIHomeScreen() {
             gap: 28,
             alignItems: "center",
             justifyContent: "center",
-            minHeight: "100vh",
             padding: "0 24px",
           }}
         >

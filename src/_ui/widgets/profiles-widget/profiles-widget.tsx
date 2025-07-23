@@ -106,34 +106,31 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
         }}
       >
         <Box noPadding>
-          <ProfilesWidgetHeader subscription={current} />
           {groups.map((group: TProxyGroup, i: number) => (
-            <div key={i}>
-              <List attached>
-                {groups.length > 1 && (
-                  <div
-                    style={{
-                      paddingLeft: "1em",
-                      paddingBottom: "1em",
-                      color: "var(--blue)",
-                      paddingTop: "1em",
-                      background: "var(--grey-100)",
-                      borderTop: "1px solid var(--grey-200)",
-                      borderBottom: "1px solid var(--grey-200)",
-                    }}
-                  >
-                    {group.name}
-                  </div>
-                )}
-                {group.all.map((proxy) => (
-                  <ProfilesWidgetItem
-                    group={group}
-                    proxy={proxy}
-                    onClick={handlerClickProxy}
-                  />
-                ))}
-              </List>
-            </div>
+            <List key={i}>
+              {groups.length > 1 && (
+                <div
+                  style={{
+                    paddingLeft: "1em",
+                    paddingBottom: "1em",
+                    color: "var(--blue)",
+                    paddingTop: "1em",
+                    background: "var(--grey-100)",
+                    borderTop: "1px solid var(--grey-200)",
+                    borderBottom: "1px solid var(--grey-200)",
+                  }}
+                >
+                  {group.name}
+                </div>
+              )}
+              {group.all.map((proxy) => (
+                <ProfilesWidgetItem
+                  group={group}
+                  proxy={proxy}
+                  onClick={handlerClickProxy}
+                />
+              ))}
+            </List>
           ))}
         </Box>
       </ProfilesWidgetContext.Provider>

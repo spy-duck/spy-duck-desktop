@@ -74,9 +74,6 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     updateLocalStatus().then(() => {
       console.debug("TUN status updated");
     });
-    changeConnectionState(
-      enable_system_proxy || enable_tun_mode ? "connected" : "disconnected",
-    );
   }, []);
 
   const { mutateAsync: updateProxyState, isPending: isPendingConnecting } =
@@ -92,7 +89,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
             await mutateVerge({ ...verge, ...proxyState }, false);
             await patchVerge(proxyState);
           })(),
-          4000,
+          2000,
         );
       },
     });
@@ -153,7 +150,11 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
         onClick={toggleConnection}
         disabled={isPendingConnecting || isPendingInstallService}
       >
-        <Icon name="power-off" rotate={isPendingConnecting} />
+        <Icon
+          name={isPendingConnecting ? "loader" : "power-off"}
+          type={isPendingConnecting ? "light" : "regular"}
+          rotate={isPendingConnecting}
+        />
       </button>
 
       {isPendingInstallService && (

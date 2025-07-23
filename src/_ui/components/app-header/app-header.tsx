@@ -5,6 +5,7 @@ import LogoPNG from "@ui/assets/images/icon-512.png";
 import styles from "./app-header.module.scss";
 import { Link } from "react-router-dom";
 import { openWebUrl } from "@/services/cmds";
+import { AppHeaderSubscriptionInfo } from "@ui/components/app-header/app-header-subscription-info";
 
 type AppHeaderProps = {};
 
@@ -40,6 +41,7 @@ export function AppHeader({}: AppHeaderProps): React.ReactElement {
         <div className={styles.appHeaderLogo}>
           <img src={LogoPNG} alt="logo" />
         </div>
+        <AppHeaderSubscriptionInfo />
         <nav>
           <ul>
             <li>
