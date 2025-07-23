@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { UILayout } from "@ui/layout";
 import Layout from "./pages/_layout";
+import { useNotificationPermission } from "./hooks/useNotificationPermission";
 
 const LOCAL_STORAGE_UI_TOGGLE_KEY = "is-new-ui";
 
 function App() {
+  useNotificationPermission();
   const [isNewUI, setIsNewUI] = useState(
     () => localStorage.getItem(LOCAL_STORAGE_UI_TOGGLE_KEY) === "true",
   );

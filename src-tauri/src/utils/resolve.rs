@@ -13,6 +13,7 @@ use anyhow::{bail, Result};
 use once_cell::sync::OnceCell;
 use parking_lot::{Mutex, RwLock};
 use percent_encoding::percent_decode_str;
+use scopeguard;
 use serde_yaml::Mapping;
 use std::{
     sync::Arc,
@@ -51,14 +52,12 @@ pub enum UiReadyStage {
 #[derive(Debug)]
 struct UiReadyState {
     stage: RwLock<UiReadyStage>,
-    last_update: RwLock<Instant>,
 }
 
 impl Default for UiReadyState {
     fn default() -> Self {
         Self {
             stage: RwLock::new(UiReadyStage::NotStarted),
-            last_update: RwLock::new(Instant::now()),
         }
     }
 }
@@ -82,20 +81,8 @@ fn get_ui_ready_state() -> &'static Arc<UiReadyState> {
 pub fn update_ui_ready_stage(stage: UiReadyStage) {
     let state = get_ui_ready_state();
     let mut stage_lock = state.stage.write();
-    let mut time_lock = state.last_update.write();
 
     *stage_lock = stage;
-    *time_lock = Instant::now();
-
-    logging!(
-        info,
-        Type::Window,
-        true,
-        "UI准备阶段更新: {:?}, 耗时: {:?}ms",
-        stage,
-        time_lock.elapsed().as_millis()
-    );
-
     // 如果是最终阶段，标记UI完全就绪
     if stage == UiReadyStage::Ready {
         mark_ui_ready();
@@ -118,9 +105,7 @@ pub fn reset_ui_ready() {
     {
         let state = get_ui_ready_state();
         let mut stage = state.stage.write();
-        let mut time = state.last_update.write();
         *stage = UiReadyStage::NotStarted;
-        *time = Instant::now();
     }
     logging!(info, Type::Window, true, "UI就绪状态已重置");
 }
@@ -133,10 +118,10 @@ pub async fn find_unused_port() -> Result<u16> {
         }
         Err(_) => {
             let port = Config::verge()
-                .latest()
+                .latest_ref()
                 .verge_mixed_port
-                .unwrap_or(Config::clash().data().get_mixed_port());
-            log::warn!(target: "app", "use default port: {}", port);
+                .unwrap_or(Config::clash().latest_ref().get_mixed_port());
+            log::warn!(target: "app", "use default port: {port}");
             Ok(port)
         }
     }
@@ -175,7 +160,7 @@ pub async fn resolve_setup_async(app_handle: &AppHandle) {
     // 启动时清理冗余的 Profile 文件
     logging!(info, Type::Setup, true, "清理冗余的Profile文件...");
     let profiles = Config::profiles();
-    if let Err(e) = profiles.latest().auto_cleanup() {
+    if let Err(e) = profiles.latest_ref().auto_cleanup() {
         logging!(warn, Type::Setup, true, "启动时清理Profile文件失败: {}", e);
     } else {
         logging!(info, Type::Setup, true, "启动时Profile文件清理完成");
@@ -219,7 +204,7 @@ pub async fn resolve_setup_async(app_handle: &AppHandle) {
     );
 
     // 创建窗口
-    let is_silent_start = { Config::verge().data().enable_silent_start }.unwrap_or(false);
+    let is_silent_start = { Config::verge().latest_ref().enable_silent_start }.unwrap_or(false);
     #[cfg(target_os = "macos")]
     {
         if is_silent_start {
@@ -294,6 +279,7 @@ pub fn create_window(is_show: bool) -> bool {
 
     if !is_show {
         logging!(info, Type::Window, true, "静默模式启动时不创建窗口");
+        lightweight::set_lightweight_mode(true);
         handle::Handle::notify_startup_completed();
         return false;
     }
@@ -336,6 +322,12 @@ pub fn create_window(is_show: bool) -> bool {
     }
 
     *creating = (true, Instant::now());
+
+    // ScopeGuard 确保创建状态重置，防止 webview 卡死
+    let _guard = scopeguard::guard(creating, |mut creating_guard| {
+        *creating_guard = (false, Instant::now());
+        logging!(debug, Type::Window, true, "[ScopeGuard] 窗口创建状态已重置");
+    });
 
     match tauri::WebviewWindowBuilder::new(
         &handle::Handle::global().app_handle().unwrap(),
@@ -418,8 +410,6 @@ pub fn create_window(is_show: bool) -> bool {
     {
         Ok(newly_created_window) => {
             logging!(debug, Type::Window, true, "主窗口实例创建成功");
-
-            *creating = (false, Instant::now());
 
             update_ui_ready_stage(UiReadyStage::NotStarted);
 
@@ -534,14 +524,13 @@ pub fn create_window(is_show: bool) -> bool {
         }
         Err(e) => {
             logging!(error, Type::Window, true, "主窗口构建失败: {}", e);
-            *creating = (false, Instant::now()); // Reset the creating state if window creation failed
             false
         }
     }
 }
 
 pub async fn resolve_scheme(param: String) -> Result<()> {
-    log::info!(target:"app", "received deep link: {}", param);
+    log::info!(target:"app", "received deep link: {param}");
 
     let param_str = if param.starts_with("[") && param.len() > 4 {
         param
@@ -579,13 +568,13 @@ pub async fn resolve_scheme(param: String) -> Result<()> {
 
         match url_param {
             Some(url) => {
-                log::info!(target:"app", "decoded subscription url: {}", url);
+                log::info!(target:"app", "decoded subscription url: {url}");
 
                 create_window(false);
                 match PrfItem::from_url(url.as_ref(), name, None, None).await {
                     Ok(item) => {
                         let uid = item.uid.clone().unwrap();
-                        let _ = wrap_err!(Config::profiles().data().append_item(item));
+                        let _ = wrap_err!(Config::profiles().data_mut().append_item(item));
                         handle::Handle::notice_message("import_sub_url::ok", uid);
                     }
                     Err(e) => {
@@ -603,12 +592,15 @@ pub async fn resolve_scheme(param: String) -> Result<()> {
 async fn resolve_random_port_config() -> Result<()> {
     let verge_config = Config::verge();
     let clash_config = Config::clash();
-    let enable_random_port = verge_config.latest().enable_random_port.unwrap_or(false);
+    let enable_random_port = verge_config
+        .latest_ref()
+        .enable_random_port
+        .unwrap_or(false);
 
     let default_port = verge_config
-        .latest()
+        .latest_ref()
         .verge_mixed_port
-        .unwrap_or(clash_config.data().get_mixed_port());
+        .unwrap_or(clash_config.latest_ref().get_mixed_port());
 
     let port = if enable_random_port {
         find_unused_port().await.unwrap_or(default_port)
@@ -620,7 +612,7 @@ async fn resolve_random_port_config() -> Result<()> {
 
     tokio::task::spawn_blocking(move || {
         let verge_config_accessor = Config::verge();
-        let mut verge_data = verge_config_accessor.data();
+        let mut verge_data = verge_config_accessor.data_mut();
         verge_data.patch_config(IVerge {
             verge_mixed_port: Some(port_to_save),
             ..IVerge::default()
@@ -631,7 +623,7 @@ async fn resolve_random_port_config() -> Result<()> {
 
     tokio::task::spawn_blocking(move || {
         let clash_config_accessor = Config::clash(); // Extend lifetime of the accessor
-        let mut clash_data = clash_config_accessor.data(); // Access within blocking task, made mutable
+        let mut clash_data = clash_config_accessor.data_mut(); // Access within blocking task, made mutable
         let mut mapping = Mapping::new();
         mapping.insert("mixed-port".into(), port_to_save.into());
         clash_data.patch_config(mapping);
