@@ -3,16 +3,17 @@ import { useRoutes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UIRoutes } from "@ui/routes";
 import { BaseErrorBoundary, NoticeManager } from "@/components/base";
-import { SvgSprite } from "@ui/components/svg-sprite";
 import { useInitApp } from "@ui/hooks/use-init-app";
 import { AuthorizationScreen } from "@ui/screens/authorization";
 import { useAuthorizationState } from "@ui/state/authorization";
 import styles from "./layout.module.scss";
-import { AppHeader } from "@ui/components/app-header";
-import { AppFooter } from "@ui/components/app-footer";
+import { AppHeader } from "@ui/widgets/app-header";
+import { AppFooter } from "@ui/widgets/app-footer";
 import { useConnectionState } from "@ui/state/connection";
-import { useVerge } from "@/hooks/use-verge";
 import { getVergeConfig } from "@/services/cmds";
+import { ModalsProvider } from "@ui/components/modal/modals-global.ctx";
+
+const SvgSprite = React.lazy(() => import("@ui/components/svg-sprite"));
 
 const queryClient = new QueryClient();
 
@@ -40,21 +41,24 @@ export function UILayout() {
     <QueryClientProvider client={queryClient}>
       <NoticeManager />
       <BaseErrorBoundary>
-        <div className={styles.layout}>
-          <div className={styles.layoutHeader}>
-            <AppHeader />
+        <ModalsProvider>
+          <div className={styles.layout}>
+            <div className={styles.layoutHeader}>
+              <AppHeader />
+            </div>
+            <div className={styles.layoutContent}>
+              {isAuthorized &&
+                routes &&
+                React.cloneElement(routes, { key: location.pathname })}
+              {!isAuthorized && <AuthorizationScreen />}
+            </div>
+            <div className={styles.layoutFooter}>
+              <AppFooter />
+            </div>
           </div>
-          <div className={styles.layoutContent}>
-            {isAuthorized &&
-              routes &&
-              React.cloneElement(routes, { key: location.pathname })}
-            {!isAuthorized && <AuthorizationScreen />}
-          </div>
-          <div className={styles.layoutFooter}>
-            <AppFooter />
-          </div>
-        </div>
-        <SvgSprite />
+          <SvgSprite />
+          <div id="overlay-modal-portal" />
+        </ModalsProvider>
       </BaseErrorBoundary>
     </QueryClientProvider>
   );

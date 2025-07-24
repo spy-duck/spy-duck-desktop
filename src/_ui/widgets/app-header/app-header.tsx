@@ -1,27 +1,17 @@
 import React from "react";
-import { confirm } from "@tauri-apps/plugin-dialog";
 import { useLogout } from "@ui/hooks/use-logout";
 import LogoPNG from "@ui/assets/images/icon-512.png";
 import styles from "./app-header.module.scss";
 import { Link } from "react-router-dom";
 import { openWebUrl } from "@/services/cmds";
-import { AppHeaderSubscriptionInfo } from "@ui/components/app-header/app-header-subscription-info";
+import { AppHeaderSubscriptionInfo } from "@ui/widgets/app-header/app-header-subscription-info";
+import { useModal } from "@ui/components/modal";
+import { SettingsModalWidget } from "@ui/widgets/settings-modal-widget";
 
 type AppHeaderProps = {};
 
 export function AppHeader({}: AppHeaderProps): React.ReactElement {
-  const logout = useLogout();
-
-  async function handlerClickLogout(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    const confirmation = await confirm(
-      "Ваша подписка будет удалена из приложения на этом ПК",
-      { title: "Подтвердите выход из аккаунта", kind: "warning" },
-    );
-    if (confirmation) {
-      await logout();
-    }
-  }
+  const { show: showSettings, props: settingsModalProps } = useModal();
 
   async function handlerClickSubscription(
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -33,6 +23,11 @@ export function AppHeader({}: AppHeaderProps): React.ReactElement {
   async function handlerClickPayment(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
     await openWebUrl("https://t.me/spy_duck_vpn_bot?startapp=payment");
+  }
+
+  async function handlerClickSettings(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    showSettings();
   }
 
   return (
@@ -55,16 +50,14 @@ export function AppHeader({}: AppHeaderProps): React.ReactElement {
               </a>
             </li>
             <li>
-              <Link to="/settings">Настройки</Link>
-            </li>
-            <li>
-              <a href="/logout" onClick={handlerClickLogout}>
-                Выход
-              </a>
+              <Link to="/settings" onClick={handlerClickSettings}>
+                Настройки
+              </Link>
             </li>
           </ul>
         </nav>
       </div>
+      <SettingsModalWidget {...settingsModalProps} />
     </header>
   );
 }

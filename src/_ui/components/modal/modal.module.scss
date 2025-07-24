@@ -1,0 +1,209 @@
+@use "@ui/assets/scss/mixins";
+
+$border-radius: 10px;
+$border-color: var(--grey-300);
+
+.modal {
+  $modal: &;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  width: 100lvw;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease-out;
+  overflow: hidden;
+  padding: 1em 3.25rem 1em 1rem;
+
+  @include mixins.media-breakpoint-down("md") {
+    padding: 0.5em;
+  }
+
+  &-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100lvw;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  &-content-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 900px;
+    max-height: 100vh;
+    background-color: #fff;
+    border-radius: $border-radius;
+    transform: translateY(1em);
+    transition: transform 0.2s ease-out;
+  }
+
+  &-header {
+    position: relative;
+    font-size: mixins.em(16);
+    padding: 0.75rem 1rem;
+    background-color: var(--grey-900);
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    border-bottom: 1px solid var(--grey-600);
+    color: var(--white);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    width: 100%;
+    margin-top: -1px;
+    @include mixins.media-breakpoint-down("md") {
+      flex-direction: column-reverse;
+      gap: 0.5em;
+    }
+
+    &-content {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      @include mixins.media-breakpoint-down("md") {
+        flex-direction: column;
+        gap: 0.5em;
+      }
+    }
+  }
+
+  &-content {
+    padding: 1em;
+  }
+
+  &-actions {
+    position: sticky;
+    z-index: 3;
+    bottom: 0;
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.5em;
+    border-top: 1px solid $border-color;
+    background-color: var(--grey-100);
+    border-bottom-left-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
+  }
+
+  &-close-button {
+    margin-right: -0.25em;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0.5em;
+    transition: opacity 0.2s ease-out;
+    color: #fff;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 4px;
+
+    @include mixins.media-breakpoint-down("md") {
+      position: absolute;
+      right: 0.5em;
+      top: 0.5em;
+      z-index: 9;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+
+    &:hover {
+      background-color: rgba(#fff, 0.2);
+    }
+  }
+
+  &--open {
+    opacity: 1;
+    pointer-events: all;
+    transition-timing-function: ease-in;
+
+    #{$modal}-content-wrapper {
+      transform: translateY(0);
+      transition-timing-function: ease-in;
+    }
+  }
+
+  &--scrollable {
+    #{$modal}-content {
+      overflow: auto;
+    }
+  }
+
+  &--show-close {
+    #{$modal}-close-button {
+      display: flex;
+    }
+  }
+
+  &:global(.-tiny) {
+    #{$modal}-content-wrapper {
+      max-width: 360px;
+    }
+  }
+
+  &:global(.-small) {
+    #{$modal}-content-wrapper {
+      max-width: 540px;
+    }
+  }
+
+  &:global(.-normal) {
+    #{$modal}-content-wrapper {
+      max-width: 720px;
+    }
+  }
+
+  &:global(.-big) {
+    #{$modal}-content-wrapper {
+      max-width: 900px;
+    }
+  }
+
+  &:global(.-large) {
+    #{$modal}-content-wrapper {
+      max-width: 1080px;
+    }
+  }
+
+  &:global(.-huge) {
+    padding: 0.5rem;
+
+    #{$modal}-content-wrapper {
+      max-width: 100%;
+      height: 100%;
+    }
+
+    #{$modal}-close-button {
+      right: 0.5em;
+      top: 0.5em;
+      z-index: 9;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
+
+  @include mixins.ui-module-colors-nested(#{$modal}-header, background-color);
+}

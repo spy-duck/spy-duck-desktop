@@ -1,0 +1,58 @@
+.switch {
+  $switch: &;
+  display: block;
+  width: 56px;
+  height: 32px;
+  background: var(--grey-300);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.3s;
+
+  input {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+  }
+
+  &-knob {
+    position: relative;
+    top: 2px;
+    height: 28px;
+    width: 28px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 0.5px solid rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 3px 8px rgba(0, 0, 0, 0.15),
+      0 3px 1px rgba(0, 0, 0, 0.06);
+    transform: translateX(2px);
+    transition:
+      transform 0.25s ease-in-out,
+      box-shadow 0.3s;
+  }
+
+  &:not(:has(input[disabled])):hover {
+    background: var(--grey-400);
+  }
+
+  &:has(input:checked) {
+    background: var(--blue);
+
+    &:not(:has(input[disabled])):hover {
+      background: var(--blue-600);
+    }
+
+    #{$switch}-knob {
+      box-shadow:
+        0 3px -8px rgba(0, 0, 0, 0.15),
+        0 3px -1px rgba(0, 0, 0, 0.06);
+      transform: translateX(calc(100% - 2px));
+    }
+  }
+
+  &:has(input[disabled]) {
+    opacity: 0.6;
+    cursor: default;
+  }
+}

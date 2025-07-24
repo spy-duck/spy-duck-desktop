@@ -1,0 +1,66 @@
+$BASE_FONT_SIZE: 14 !default;
+
+$white: #fdfbfb !default;
+$red: #ff3b30 !default;
+$orange: #ff9500 !default;
+$yellow: #ffcc00 !default;
+$olive: #b5cc18 !default;
+$green: #34c759 !default;
+$teal: #30b0c7 !default;
+$blue: #0a84ff !default;
+$violet: #af52de !default;
+$purple: #a333c8 !default;
+$pink: #ff2d55 !default;
+$brown: #a2845e !default;
+$grey: #bbbbbd !default;
+$black: #0f0f0f !default;
+
+$baseTextColor: $black;
+
+$colors-map: (
+  white: $white,
+  red: $red,
+  orange: $orange,
+  yellow: $yellow,
+  olive: $olive,
+  green: $green,
+  teal: $teal,
+  blue: $blue,
+  violet: $violet,
+  purple: $purple,
+  pink: $pink,
+  brown: $brown,
+  grey: $grey,
+  black: $black,
+);
+$grid-breakpoints: (
+  // Extra small screen / phone
+  xs: 0,
+  // Small screen / phone
+  sm: 544px,
+  // Medium screen / tablet
+  md: 768px,
+  // Large screen / desktop
+  lg: 992px,
+  // Extra large screen / wide desktop
+  xl: 1200px,
+  // Extra large screen / wide desktop
+  xxl: 1366px,
+  // Extra large screen / wide desktop
+  max: 1920px
+);
+
+$maxIndentSize: 10 !default;
+
+/**
+Input
+ */
+
+$input-color: $black;
+$input-font-size: 15;
+$label-font-site: 13;
+$input-label-color: #788083;
+$input-label-color-hover: #2d3436;
+$input-label-font-site: 13;
+$input-border-color: #dfe6e9;
+$input-border-color-hover: #c5cccc;

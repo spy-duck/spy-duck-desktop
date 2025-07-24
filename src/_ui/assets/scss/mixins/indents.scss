@@ -1,0 +1,33 @@
+@use "sass:math";
+@use "number-to-string" as *;
+@use "str-replace" as *;
+
+$indentsMap: (
+  m: "margin",
+  mt: "margin-top",
+  mb: "margin-bottom",
+  ml: "margin-left",
+  mr: "margin-right",
+
+  p: "padding",
+  pt: "padding-top",
+  pb: "padding-bottom",
+  pl: "padding-left",
+  pr: "padding-right",
+);
+
+@mixin generate-margins-and-paddings($max: 10) {
+  @each $code, $property in $indentsMap {
+    @for $i from 0 through ($max * 2) + 1 {
+      @if math.div($i, 2) == 0.5 {
+        .#{$code}#{str-replace(str-replace(number-to-string(math.div($i, 2)), ".", "-"), "0", "")} {
+          #{$property}: #{math.div($i, 2)}rem !important;
+        }
+      } @else {
+        .#{$code}#{str-replace(number-to-string(math.div($i, 2)), ".", "-")} {
+          #{$property}: #{math.div($i, 2)}rem !important;
+        }
+      }
+    }
+  }
+}

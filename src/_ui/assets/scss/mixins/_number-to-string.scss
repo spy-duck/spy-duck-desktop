@@ -1,0 +1,11 @@
+@use "sass:meta";
+
+@function number-to-string($value) {
+  @if meta.type-of($value) == "number" {
+    @return #{$value};
+  } @else if meta.type-of($value) == "string" {
+    @return $value;
+  } @else {
+    @error 'Input #{$value} is no number or string';
+  }
+}

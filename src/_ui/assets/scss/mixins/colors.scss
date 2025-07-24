@@ -1,0 +1,221 @@
+@use "../variables" as *;
+
+@mixin ui-colors($param: color) {
+  &.-white {
+    #{$param}: $white;
+  }
+  &.-red {
+    #{$param}: $red;
+  }
+  &.-orange {
+    #{$param}: $orange;
+  }
+  &.-yellow {
+    #{$param}: $yellow;
+  }
+  &.-olive {
+    #{$param}: $olive;
+  }
+  &.-green {
+    #{$param}: $green;
+  }
+  &.-teal {
+    #{$param}: $teal;
+  }
+  &.-blue {
+    #{$param}: $blue;
+  }
+  &.-violet {
+    #{$param}: $violet;
+  }
+  &.-purple {
+    #{$param}: $purple;
+  }
+  &.-pink {
+    #{$param}: $pink;
+  }
+  &.-brown {
+    #{$param}: $brown;
+  }
+  &.-grey {
+    #{$param}: $grey;
+  }
+  &.-black {
+    #{$param}: $black;
+  }
+}
+
+@mixin ui-colors-nested($selector, $param: color) {
+  &.-white {
+    #{$selector} {
+      #{$param}: $white;
+    }
+  }
+  &.-red {
+    #{$selector} {
+      #{$param}: $red;
+    }
+  }
+  &.-orange {
+    #{$param}: $orange;
+  }
+  &.-yellow {
+    #{$param}: $yellow;
+  }
+  &.-olive {
+    #{$param}: $olive;
+  }
+  &.-green {
+    #{$param}: $green;
+  }
+  &.-teal {
+    #{$param}: $teal;
+  }
+  &.-blue {
+    #{$param}: $blue;
+  }
+  &.-violet {
+    #{$param}: $violet;
+  }
+  &.-purple {
+    #{$param}: $purple;
+  }
+  &.-pink {
+    #{$param}: $pink;
+  }
+  &.-brown {
+    #{$param}: $brown;
+  }
+  &.-grey {
+    #{$param}: $grey;
+  }
+  &.-black {
+    #{$param}: $black;
+  }
+}
+
+@mixin ui-module-colors($param: color) {
+  &:global(.-white) {
+    #{$param}: $white;
+  }
+  &:global(.-red) {
+    #{$param}: $red;
+  }
+  &:global(.-orange) {
+    #{$param}: $orange;
+  }
+  &:global(.-yellow) {
+    #{$param}: $yellow;
+  }
+  &:global(.-olive) {
+    #{$param}: $olive;
+  }
+  &:global(.-green) {
+    #{$param}: $green;
+  }
+  &:global(.-teal) {
+    #{$param}: $teal;
+  }
+  &:global(.-blue) {
+    #{$param}: $blue;
+  }
+  &:global(.-violet) {
+    #{$param}: $violet;
+  }
+  &:global(.-purple) {
+    #{$param}: $purple;
+  }
+  &:global(.-pink) {
+    #{$param}: $pink;
+  }
+  &:global(.-brown) {
+    #{$param}: $brown;
+  }
+  &:global(.-grey) {
+    #{$param}: $grey;
+  }
+  &:global(.-black) {
+    #{$param}: $black;
+  }
+}
+
+@mixin ui-module-colors-nested($selector, $param: color) {
+  &:global(.-white) {
+    #{$selector} {
+      #{$param}: $white;
+    }
+  }
+  &:global(.-red) {
+    #{$selector} {
+      #{$param}: $red;
+    }
+  }
+  &:global(.-orange) {
+    #{$selector} {
+      #{$param}: $orange;
+    }
+  }
+  &:global(.-yellow) {
+    #{$selector} {
+      #{$param}: $yellow;
+    }
+  }
+  &:global(.-olive) {
+    #{$selector} {
+      #{$param}: $olive;
+    }
+  }
+  &:global(.-green) {
+    #{$selector} {
+      #{$param}: $green;
+    }
+  }
+  &:global(.-teal) {
+    #{$selector} {
+      #{$param}: $teal;
+    }
+  }
+  &:global(.-blue) {
+    #{$selector} {
+      #{$param}: $blue;
+    }
+  }
+  &:global(.-violet) {
+    #{$selector} {
+      #{$param}: $violet;
+    }
+  }
+  &:global(.-purple) {
+    #{$selector} {
+      #{$param}: $purple;
+    }
+  }
+  &:global(.-pink) {
+    #{$selector} {
+      #{$param}: $pink;
+    }
+  }
+  &:global(.-brown) {
+    #{$selector} {
+      #{$param}: $brown;
+    }
+  }
+  &:global(.-grey) {
+    #{$selector} {
+      #{$param}: $grey;
+    }
+  }
+  &:global(.-black) {
+    #{$selector} {
+      #{$param}: $black;
+    }
+  }
+}
+
+@mixin generate-font-colors() {
+  @each $colorName, $value in $colors-map {
+    .color-#{"" + $colorName} {
+      color: $value;
+    }
+  }
+}

@@ -21,6 +21,7 @@
 
     display: flex;
     align-items: stretch;
+    justify-content: center;
     gap: 0.5rem;
     position: relative;
     list-style: none;
@@ -51,14 +52,13 @@
       &:not(#{$item}--current):hover {
         background: rgba(0, 0, 0, 0.05);
       }
-
-      &:has(+ #{$item}:hover) {
-        &:after {
-          opacity: 0;
-        }
-      }
-
       &:hover:after {
+        opacity: 0;
+      }
+    }
+
+    &:has(+ #{$item}:hover) {
+      &:after {
         opacity: 0;
       }
     }
@@ -104,18 +104,25 @@
     }
 
     &-inner {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
       flex: 1;
       border: none;
       outline: none;
       background-color: transparent;
       text-align: left;
       padding: 0.5rem 1rem;
+      min-height: 48px;
     }
 
     &-title {
-      display: block;
+      flex: 1;
       font-size: 15px;
       line-height: 22px;
+      font-family: "SF Pro", sans-serif;
+      font-weight: normal !important;
+      color: var(--black);
     }
 
     &.red &-title {

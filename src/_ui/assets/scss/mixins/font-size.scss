@@ -1,0 +1,10 @@
+@use "em" as *;
+@use "../variables" as *;
+
+@mixin generate-font-sizes($min: 8, $max: 32) {
+  @for $i from $min through $max {
+    .fz#{$i} {
+      font-size: em($i) !important;
+    }
+  }
+}
