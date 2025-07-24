@@ -49,7 +49,7 @@ $border-color: var(--grey-300);
 
   &-header {
     position: relative;
-    font-size: mixins.em(16);
+    font-size: mixins.em(14);
     padding: 0.75rem 1rem;
     background-color: var(--grey-900);
     border-top-left-radius: $border-radius;
@@ -103,6 +103,8 @@ $border-color: var(--grey-300);
   }
 
   &-close-button {
+    position: absolute;
+    right: 0.5rem;
     margin-right: -0.25em;
     display: none;
     align-items: center;

@@ -20,7 +20,7 @@ function App() {
             return !p;
           })
         }
-        style={{ position: "fixed", bottom: 10, right: 10, zIndex: 1000 }}
+        style={{ position: "fixed", bottom: 10, left: 10, zIndex: 1000 }}
       >
         Toggle UI
       </button>

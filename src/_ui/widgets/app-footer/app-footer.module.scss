@@ -4,14 +4,23 @@
   color: var(--white);
 
   &-inner {
+    position: relative;
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 1em;
     padding: 0 1em;
-    max-width: 768px;
     margin: 0 auto;
   }
+
+  &-version {
+    position: absolute;
+    right: 1rem;
+    flex: 1;
+  }
 }
+
+$chartWidth: 120px;
 
 .traffic {
   display: flex;
@@ -22,14 +31,14 @@
   &-chart {
     padding: 0.5em 0;
     transition: max-width 1s;
-    width: 120px;
+    width: $chartWidth;
     height: 48px;
     max-width: 0;
     overflow: hidden;
 
     canvas {
-      width: 120px;
-      height: 48px;
+      width: $chartWidth !important;
+      height: 100%;
     }
 
     &--visible {

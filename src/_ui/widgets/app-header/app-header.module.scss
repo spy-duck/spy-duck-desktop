@@ -24,8 +24,10 @@
   }
 
   nav {
+    flex: 1;
     ul {
       display: flex;
+      justify-content: flex-end;
       list-style: none;
     }
 
@@ -47,10 +49,9 @@
   }
 
   &-subscription {
-    flex: 1;
     color: var(--grey-100);
-    margin-left: 1em;
     display: flex;
+    gap: 1em;
 
     &-inner {
       flex: 1;

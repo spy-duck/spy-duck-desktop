@@ -93,7 +93,14 @@ body {
   line-height: 1.4;
 
   color: #0f0f0f;
-  background-color: #e0e0e0;
+  background: linear-gradient(
+    155deg,
+    #bfbfbf 0%,
+    #e4e4e4 50%,
+    #e0e0e0 51%,
+    #f8f8f8 80%,
+    #e4e4e4 100%
+  );
 
   &-header {
   }

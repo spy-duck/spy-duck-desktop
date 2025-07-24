@@ -55,7 +55,7 @@ const Modal: TModalComplex = ({
           [`-${size}`]: size,
           [`-${color}`]: color,
         })}
-        style={{ zIndex: 9900 + index, ...style }}
+        style={{ zIndex: 99 + index, ...style }}
       >
         <div
           className={styles.modalOverlay}

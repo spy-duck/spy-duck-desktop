@@ -14,7 +14,14 @@ export function UIHomeScreen() {
           flex: 1,
         }}
       >
-        <div style={{ width: 360, height: "100%" }}>
+        <div
+          style={{
+            width: 360,
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <ProfilesWidget />
         </div>
         <div

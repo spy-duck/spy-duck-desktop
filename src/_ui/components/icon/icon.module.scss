@@ -44,55 +44,55 @@
     font-size: 2em;
   }
 
-  &.white {
+  &:global(.white) {
     color: var(--white);
   }
 
-  &.red {
+  &:global(.red) {
     color: var(--red);
   }
 
-  &.orange {
+  &:global(.orange) {
     color: var(--orange);
   }
 
-  &.yellow {
+  &:global(.yellow) {
     color: var(--yellow);
   }
 
-  &.green {
+  &:global(.green) {
     color: var(--green);
   }
 
-  &.teal {
+  &:global(.teal) {
     color: var(--teal);
   }
 
-  &.blue {
+  &:global(.blue) {
     color: var(--blue);
   }
 
-  &.violet {
+  &:global(.violet) {
     color: var(--violet);
   }
 
-  &.indigo {
+  &:global(.indigo) {
     color: var(--indigo);
   }
 
-  &.pink {
+  &:global(.pink) {
     color: var(--pink);
   }
 
-  &.brown {
+  &:global(.brown) {
     color: var(--brown);
   }
 
-  &.grey {
+  &:global(.grey) {
     color: var(--grey);
   }
 
-  &.black {
+  &:global(.black) {
     color: var(--black);
   }
 

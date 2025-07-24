@@ -1,21 +1,25 @@
 import React, { useEffect } from "react";
 import { useRoutes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { UIRoutes } from "@ui/routes";
+import { z } from "zod/v4";
+import { getVergeConfig } from "@/services/cmds";
 import { BaseErrorBoundary, NoticeManager } from "@/components/base";
+import { UIRoutes } from "@ui/routes";
 import { useInitApp } from "@ui/hooks/use-init-app";
 import { AuthorizationScreen } from "@ui/screens/authorization";
 import { useAuthorizationState } from "@ui/state/authorization";
-import styles from "./layout.module.scss";
 import { AppHeader } from "@ui/widgets/app-header";
 import { AppFooter } from "@ui/widgets/app-footer";
 import { useConnectionState } from "@ui/state/connection";
-import { getVergeConfig } from "@/services/cmds";
 import { ModalsProvider } from "@ui/components/modal/modals-global.ctx";
+import styles from "./layout.module.scss";
 
 const SvgSprite = React.lazy(() => import("@ui/components/svg-sprite"));
 
 const queryClient = new QueryClient();
+
+// TODO: change to global lang
+z.config(z.locales.ru());
 
 export function UILayout() {
   const routes = useRoutes(UIRoutes);

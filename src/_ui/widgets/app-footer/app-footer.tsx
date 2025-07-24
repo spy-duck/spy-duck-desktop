@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
-import styles from "./app-footer.module.scss";
+import clsx from "clsx";
+import { version } from "@root/package.json";
 import { useClashInfo } from "@/hooks/use-clash";
 import useSWRSubscription from "swr/subscription";
 import { createAuthSockette } from "@/utils/websocket";
@@ -7,7 +8,7 @@ import { TrafficGraph, TrafficRef } from "@/components/layout/traffic-graph";
 import parseTraffic from "@/utils/parse-traffic";
 import { Icon } from "@ui/components/icon";
 import { useConnectionState } from "@ui/state/connection";
-import clsx from "clsx";
+import styles from "./app-footer.module.scss";
 
 type AppFooterProps = {};
 
@@ -16,6 +17,7 @@ export function AppFooter({}: AppFooterProps): React.ReactElement {
     <footer className={styles.appFooter}>
       <div className={styles.appFooterInner}>
         <Traffic></Traffic>
+        <div className={styles.appFooterVersion}>v{version}</div>
       </div>
     </footer>
   );

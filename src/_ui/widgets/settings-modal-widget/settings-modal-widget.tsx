@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { Modal, ModalProps } from "@ui/components/modal";
+import React, { useRef, useState } from "react";
+import { Modal, ModalProps, useModal } from "@ui/components/modal";
 import { Flex } from "@ui/components/flex";
 import { Switch } from "@ui/components/switch";
 import { useVerge } from "@/hooks/use-verge";
@@ -14,6 +14,9 @@ import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { DialogRef } from "@/components/base";
 import { UpdateViewer } from "@/components/setting/mods/update-viewer";
 import { useTranslation } from "react-i18next";
+import { useClashInfo } from "@/hooks/use-clash";
+import { useRequest } from "ahooks";
+import { PortSettingsModal } from "@ui/widgets/settings-modal-widget/port-settings-modal";
 
 type SettingsModalWidgetProps = ModalProps;
 
@@ -24,8 +27,10 @@ export function SettingsModalWidget({
   const { verge, mutateVerge, patchVerge } = useVerge();
   const { isAdminMode } = useSystemState();
   const logout = useLogout();
+  const { clashInfo, patchInfo } = useClashInfo();
   const { enable_auto_launch } = verge ?? {};
   const updateRef = useRef<DialogRef>(null);
+  const { show: showPortSettings, props: portSettingsProps } = useModal();
 
   async function handlerClickLogout(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
@@ -101,6 +106,19 @@ export function SettingsModalWidget({
               />
             </Flex>
           </ListItem>
+          <ListItem onClick={() => showPortSettings()}>
+            <Flex
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={14}
+            >
+              Порт
+              <div>
+                {verge?.verge_mixed_port ?? clashInfo?.mixed_port ?? 7897}
+              </div>
+            </Flex>
+          </ListItem>
           <ListItem onClick={handlerClickCheckUpdates}>
             Проверить обновление
           </ListItem>
@@ -109,6 +127,7 @@ export function SettingsModalWidget({
         </List>
       </Modal.Content>
       <UpdateViewer ref={updateRef} />
+      <PortSettingsModal {...portSettingsProps} />
     </Modal>
   );
 }

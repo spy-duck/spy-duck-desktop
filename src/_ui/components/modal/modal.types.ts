@@ -3,7 +3,7 @@ import { TColor, TSize } from "@ui/types/common";
 
 export type ModalProps = {
   open: boolean;
-  onClose?: () => void;
+  onClose: () => void;
   index?: number;
   className?: string;
   style?: React.CSSProperties;

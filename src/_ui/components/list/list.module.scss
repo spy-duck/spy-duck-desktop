@@ -57,7 +57,7 @@
       }
     }
 
-    &:has(+ #{$item}:hover) {
+    &:has(+ #{$item}--clickable:hover) {
       &:after {
         opacity: 0;
       }

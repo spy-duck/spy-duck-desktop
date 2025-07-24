@@ -1,5 +1,6 @@
 .profiles-widget {
   $widget: &;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -58,6 +59,12 @@
         color: var(--grey-500);
       }
     }
+  }
+
+  [class*="list-item--current"] {
+    position: sticky;
+    top: -5px;
+    z-index: 100;
   }
 
   &-proxy {
