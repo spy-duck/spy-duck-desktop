@@ -166,7 +166,6 @@ export function PortSettingsModal({
     await saveSettings({ clashConfig, vergeConfig });
   }
 
-  console.log(form.formState.errors);
   const sharedInputProps = {
     style: { maxWidth: 180 },
     min: 0,

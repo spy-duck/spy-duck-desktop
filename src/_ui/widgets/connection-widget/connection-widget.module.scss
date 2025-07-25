@@ -23,7 +23,7 @@
     transition:
       0.2s color,
       0.2s background-color;
-    box-shadow: var(--shadow-sm) !important;
+    box-shadow: var(--shadow) !important;
 
     &:not(&--connected):hover {
       background-color: var(--grey-600);
@@ -47,7 +47,14 @@
     }
 
     &--connected {
-      background-color: var(--green);
+      background: var(--green);
+      background: linear-gradient(
+        155deg,
+        rgba(52, 199, 89, 1) 0%,
+        rgba(83, 224, 118, 1) 73%,
+        rgba(67, 209, 102, 1) 100%
+      );
+
       color: var(--grey-900);
     }
   }

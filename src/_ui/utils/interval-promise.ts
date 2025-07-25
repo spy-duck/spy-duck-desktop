@@ -21,11 +21,6 @@ export function intervalPromise<T>(
       .then((result: T) => {
         const endTime = Date.now();
         const elapsedTime = endTime - startTime;
-        console.log({
-          startTime,
-          endTime,
-          elapsedTime,
-        });
         const roundedTime = Math.ceil(elapsedTime / intervalMs) * intervalMs;
         const delay = roundedTime - elapsedTime;
 

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLockFn } from "ahooks";
 import {
@@ -16,6 +16,10 @@ import { axiosClient } from "@ui/utils/api-fetch";
 import { Icon } from "@ui/components/icon";
 import LogoPNG from "@ui/assets/images/icon-512.png";
 import styles from "./authorization.module.scss";
+import { AuthByKeyWidget } from "@ui/widgets/auth-by-key-widget";
+import { useModal } from "@ui/components/modal";
+import { showNotice } from "@/services/noticeService";
+import { STORAGE_ACCESS_TOKEN } from "@ui/consts";
 
 const BOT_URL =
   import.meta.env.MODE === "development"
@@ -30,7 +34,8 @@ export function AuthorizationScreen() {
   const changeAuthorizationState = useAuthorizationState(
     (state) => state.changeAuthorizationState,
   );
-  const { mutateProfiles } = useProfiles();
+
+  const { mutateProfiles, activateSelected } = useProfiles();
 
   const { data: sysInfoData } = useQuery({
     queryKey: ["sysInfo"],
@@ -39,19 +44,25 @@ export function AuthorizationScreen() {
     },
   });
 
-  const onEnhance = useLockFn(async (notifySuccess: boolean) => {
+  const { show: showAuthByKey, props: authByKeyProps } = useModal();
+
+  const onEnhance = async (notifySuccess: boolean) => {
     try {
       await enhanceProfiles();
     } catch (err: any) {
-      alert(err.message || err.toString());
+      showNotice("error", err.message || err.toString(), 3000);
+      return;
     }
-  });
+    if (notifySuccess) {
+      showNotice("success", "Профиль успешно импортирован", 1000);
+    }
+  };
 
   const importSubscription = async (subscription: string) => {
     try {
       await importProfile(subscription);
       await mutateProfiles();
-      await onEnhance(false);
+      await onEnhance(true);
     } catch (e) {
       console.error(e);
       await importProfile(subscription, {
@@ -59,31 +70,36 @@ export function AuthorizationScreen() {
         self_proxy: true,
       });
       await mutateProfiles();
-      await onEnhance(false);
+      await onEnhance(true);
     }
   };
 
-  const { mutate, isPending } = useMutation({
-    mutationKey: ["auth"],
-    mutationFn: async (
-      authData: any,
-    ): Promise<{ accessToken: string; subscription: string }> => {
-      const response = await axiosClient.post("/auth", authData);
-      return response.data;
-    },
-    async onSuccess(data: { accessToken: string; subscription: string }) {
-      console.log("SUCCESS");
-      console.log(data);
-      localStorage.setItem("accessToken", data.accessToken);
-      await importSubscription(data.subscription);
-      changeAuthorizationState(true);
-    },
-    onError(error: any) {
-      console.log(error.details);
-    },
-    retry: 90,
-    retryDelay: 2000,
-  });
+  async function onSuccessAuth(data: {
+    accessToken: string;
+    subscription: string;
+  }) {
+    localStorage.setItem(STORAGE_ACCESS_TOKEN, data.accessToken);
+    await importSubscription(data.subscription);
+    await activateSelected();
+    changeAuthorizationState(true);
+  }
+
+  const { mutate: mutateCheckAuth, isPending: isPendingCheckAuth } =
+    useMutation({
+      mutationKey: ["auth"],
+      mutationFn: async (
+        authData: any,
+      ): Promise<{ accessToken: string; subscription: string }> => {
+        const response = await axiosClient.post("/auth", authData);
+        return response.data;
+      },
+      onSuccess: onSuccessAuth,
+      onError(error: any) {
+        console.log(error.details);
+      },
+      retry: 90,
+      retryDelay: 2000,
+    });
 
   const { data: systemHostname } = useQuery({
     queryKey: ["systemHostname"],
@@ -114,10 +130,10 @@ export function AuthorizationScreen() {
     };
   }, []);
 
-  async function handlerClickAuth() {
-    await openWebUrl(`${BOT_URL}?start=desktop-auth-${ref.current.authToken}`);
-    mutate({
-      authToken: ref.current.authToken,
+  const makeAuthData = useCallback(async (): Promise<
+    Record<string, string | undefined>
+  > => {
+    return {
       platform: sysInfo?.platform,
       systemVersion: sysInfo?.systemVersion,
       kernelVersion: sysInfo?.kernelVersion,
@@ -132,17 +148,40 @@ export function AuthorizationScreen() {
           systemHostname,
         ].join(":"),
       ),
+    };
+  }, [sysInfo, systemHostname]);
+
+  async function handlerClickAuth() {
+    await openWebUrl(`${BOT_URL}?start=desktop-auth-${ref.current.authToken}`);
+    mutateCheckAuth({
+      authToken: ref.current.authToken,
+      ...(await makeAuthData()),
     });
   }
 
   return (
     <div className={styles.authorization}>
       <img className={styles.authorizationLogo} src={LogoPNG} alt="Logo" />
-      <h1>Нужно авторизоваться</h1>
-      <UIButton onClick={handlerClickAuth} disabled={isPending}>
+
+      <UIButton onClick={handlerClickAuth} loading={isPendingCheckAuth}>
         <Icon name="paper-plane" type="solid" style={{ marginRight: 14 }} />
-        Авторизоваться
+        Авторизоваться через Telegram
       </UIButton>
+
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          showAuthByKey();
+        }}
+      >
+        Войти по ключу
+      </a>
+      <AuthByKeyWidget
+        {...authByKeyProps}
+        makeAuthData={makeAuthData}
+        onSuccess={onSuccessAuth}
+      />
     </div>
   );
 }

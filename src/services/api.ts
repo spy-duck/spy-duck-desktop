@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { getClashInfo } from "./cmds";
 import { invoke } from "@tauri-apps/api/core";
+import { random } from "lodash-es";
 
 let instancePromise: Promise<AxiosInstance> = null!;
 
@@ -500,6 +501,9 @@ export const getIpInfo = async (): Promise<IpInfo> => {
           }, service.timeout || serviceTimeout);
 
           const response = await axios.get(service.url, {
+            params: {
+              hash: random(9000, 999000),
+            },
             signal: timeoutController.signal,
             timeout: service.timeout || serviceTimeout,
             // 移除了headers参数（默认会使用axios的默认User-Agent）

@@ -24,23 +24,23 @@
     }
   }
 
-  &--tiny {
+  &:global(.tiny) {
     font-size: 0.5em;
   }
 
-  &--small {
+  &:global(.small) {
     font-size: 0.75em;
   }
 
-  &--big {
+  &:global(.big) {
     font-size: 1.25em;
   }
 
-  &--large {
+  &:global(.large) {
     font-size: 1.5em;
   }
 
-  &--huge {
+  &:global(.huge) {
     font-size: 2em;
   }
 

@@ -18,6 +18,7 @@ export function IpInfoWidget({}: IpInfoWidgetProps): React.ReactElement {
   const ref = useRef<NodeJS.Timeout | undefined>(undefined);
   const connectionState = useConnectionState((state) => state.connectionState);
   const [ipInfo, setIpInfo] = useState<IpInfo>({} as any);
+
   const { isPending, mutate } = useMutation({
     mutationFn: () => {
       clearTimeout(ref.current);
@@ -27,6 +28,9 @@ export function IpInfoWidget({}: IpInfoWidgetProps): React.ReactElement {
       setIpInfo(data);
       ref.current = setTimeout(mutate, 3 * 60 * 1000);
     },
+    gcTime: 0,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   useEffect(() => {

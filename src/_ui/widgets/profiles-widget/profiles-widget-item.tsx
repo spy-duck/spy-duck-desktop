@@ -29,20 +29,26 @@ function convertDelayColor(delayValue: number) {
 type ProfilesWidgetItemProps = {
   proxy: TProxy;
   group: TProxyGroup;
+  index: number;
   onClick(groupName: string, itemName: string): void;
 };
 
 export function ProfilesWidgetItem({
   group,
   proxy,
+  index,
   onClick,
 }: ProfilesWidgetItemProps) {
   const { selectedProxyGroup, selectedProxy } = useContext(
     ProfilesWidgetContext,
   );
 
+  const isCurrent =
+    (index === 0 && !selectedProxy && !selectedProxyGroup) ||
+    (group.name === selectedProxyGroup && proxy.name === selectedProxy);
+
   function handlerClickProxy() {
-    if (group.name !== selectedProxyGroup || proxy.name !== selectedProxy) {
+    if (!isCurrent) {
       onClick(group.name, proxy.name);
     }
   }
@@ -56,9 +62,7 @@ export function ProfilesWidgetItem({
   return (
     <ListItem
       key={group.name + proxy.id}
-      current={
-        group.name === selectedProxyGroup && proxy.name === selectedProxy
-      }
+      current={isCurrent}
       onClick={handlerClickProxy}
     >
       <div className={styles.profilesWidgetProxy}>

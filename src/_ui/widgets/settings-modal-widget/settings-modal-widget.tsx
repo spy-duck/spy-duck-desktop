@@ -27,7 +27,7 @@ export function SettingsModalWidget({
   const { verge, mutateVerge, patchVerge } = useVerge();
   const { isAdminMode } = useSystemState();
   const logout = useLogout();
-  const { clashInfo, patchInfo } = useClashInfo();
+  const { clashInfo } = useClashInfo();
   const { enable_auto_launch } = verge ?? {};
   const updateRef = useRef<DialogRef>(null);
   const { show: showPortSettings, props: portSettingsProps } = useModal();
@@ -77,7 +77,6 @@ export function SettingsModalWidget({
       mutateVerge({ ...verge, enable_auto_launch: e.target.checked }, false);
       await patchVerge({ enable_auto_launch: e.target.checked });
       await mutate("getAutoLaunchStatus");
-      console.log("HERE", e.target.checked);
       return Promise.resolve();
     } catch (error) {
       console.error(error);

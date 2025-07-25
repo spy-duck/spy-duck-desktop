@@ -8,27 +8,24 @@ type InputProps = ComponentProps<"input"> & {
   error?: ReactNode;
 };
 
-export function Input({
-  label,
-  error,
-  style,
-  ...rest
-}: InputProps): React.ReactElement {
-  return (
-    <div
-      className={clsx(styles.input, label && styles.inputWithLabel)}
-      style={style}
-    >
-      {label && <label>{label}:</label>}
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  function Input({ label, error, style, ...rest }, ref): React.ReactElement {
+    return (
+      <div
+        className={clsx(styles.input, label && styles.inputWithLabel)}
+        style={style}
+      >
+        {label && <label>{label}:</label>}
 
-      <div className={styles.inputWrapper}>
-        <input {...rest} />
+        <div className={styles.inputWrapper}>
+          <input ref={ref} {...rest} />
+        </div>
+        {error && (
+          <em className={styles.inputError} role="alert">
+            {error}
+          </em>
+        )}
       </div>
-      {error && (
-        <em className={styles.inputError} role="alert">
-          {error}
-        </em>
-      )}
-    </div>
-  );
-}
+    );
+  },
+);

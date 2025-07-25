@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "identifier": "io.github.spy-duck.spy-duck-desktop",
-  "productName": "Clash Verge",
+  "productName": "Spy Duck VPN",
   "bundle": {
     "targets": ["app", "dmg"],
     "macOS": {
@@ -11,7 +11,7 @@
       "signingIdentity": null,
       "entitlements": "packages/macos/entitlements.plist",
       "dmg": {
-        "background": "images/background.png",
+        "background": "images/spy_duck_background.png",
         "appPosition": {
           "x": 180,
           "y": 170

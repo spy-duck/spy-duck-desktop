@@ -5,11 +5,11 @@
     "active": true,
     "longDescription": "Spy Duck VPN",
     "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/spy_duck/32x32.png",
+      "icons/spy_duck/128x128.png",
+      "icons/spy_duck/128x128@2x.png",
+      "icons/spy_duck/icon.icns",
+      "icons/spy_duck/icon.ico"
     ],
     "resources": ["resources", "resources/locales/*"],
     "publisher": "Spy Duck VPN",
@@ -29,7 +29,7 @@
   "identifier": "io.github.spy-duck.spy-duck-desktop",
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQyOEMyRjBCQkVGOUJEREYKUldUZnZmbStDeStNMHU5Mmo1N24xQXZwSVRYbXA2NUpzZE5oVzlqeS9Bc0t6RVV4MmtwVjBZaHgK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlEODE5RURCMDMzNUFBNUEKUldSYXFqVUQyNTZCblRNU3k1b2E4TWdZU08rb0hMVmpVdmE0cnQ0S1FUQzdUS2w3cVNGTHRDK0oK",
       "endpoints": [
         "https://download.clashverge.dev/https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater/update-proxy.json",
         "https://gh-proxy.com/https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater/update-proxy.json",

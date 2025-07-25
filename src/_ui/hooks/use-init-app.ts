@@ -4,6 +4,9 @@ import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import dayjs from "dayjs";
 import i18next from "i18next";
+import { useQuery } from "@tanstack/react-query";
+import { useClash } from "@/hooks/use-clash";
+import { DEV_URLS, IS_DEV_MODE } from "@ui/consts";
 
 const MAX_INIT_ATTEMPTS = 3;
 
@@ -180,7 +183,33 @@ export function useInitApp() {
       i18next.changeLanguage(language);
     }
   }, [language]);
+
+  const { clash, mutateClash, patchClash } = useClash();
+  useEffect(() => {
+    (async () => {
+      const cors = clash?.["external-controller-cors"];
+      const origins = cors?.["allow-origins"] ?? ["*"];
+      console.log(origins);
+      await patchClash({
+        "external-controller-cors": {
+          "allow-private-network": cors?.["allow-private-network"] ?? true,
+          "allow-origins": [
+            "https://spy-duck.com",
+            ...filterDevOrigins(origins),
+          ],
+        },
+      });
+      await mutateClash();
+    })();
+  }, []);
 }
+
+const filterDevOrigins = (origins: string[]) => {
+  if (IS_DEV_MODE) {
+    return origins;
+  }
+  return origins.filter((origin: string) => !DEV_URLS.includes(origin.trim()));
+};
 
 const notifyBackend = async (action: string, stage?: string) => {
   try {

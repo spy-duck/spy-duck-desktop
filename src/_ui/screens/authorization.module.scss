@@ -5,10 +5,17 @@
   justify-content: center;
   width: 100%;
   height: 100%;
+  gap: 2em;
 
   &-logo {
-    max-width: 312px;
-    min-width: 256px;
-    width: 50vw;
+    width: 312px;
+    height: 312px;
+    border-radius: 50%;
+    box-shadow: var(--shadow-xl);
+  }
+
+  a {
+    text-decoration: none;
+    color: var(--black);
   }
 }

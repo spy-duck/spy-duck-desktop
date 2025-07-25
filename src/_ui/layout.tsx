@@ -47,18 +47,22 @@ export function UILayout() {
       <BaseErrorBoundary>
         <ModalsProvider>
           <div className={styles.layout}>
-            <div className={styles.layoutHeader}>
-              <AppHeader />
-            </div>
+            {isAuthorized && (
+              <div className={styles.layoutHeader}>
+                <AppHeader />
+              </div>
+            )}
             <div className={styles.layoutContent}>
               {isAuthorized &&
                 routes &&
                 React.cloneElement(routes, { key: location.pathname })}
               {!isAuthorized && <AuthorizationScreen />}
             </div>
-            <div className={styles.layoutFooter}>
-              <AppFooter />
-            </div>
+            {isAuthorized && (
+              <div className={styles.layoutFooter}>
+                <AppFooter />
+              </div>
+            )}
           </div>
           <SvgSprite />
           <div id="overlay-modal-portal" />

@@ -10,7 +10,7 @@ import { mutate } from "swr";
 import { useConnectionState } from "@ui/state/connection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServiceControls } from "@ui/hooks/use-service-controls";
-import { intervalPromise } from "@ui/utils/interval-promise";
+import { useProxyState } from "@ui/hooks/use-proxy-state";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
@@ -20,15 +20,18 @@ type ConnectionButtonProps = {};
 
 export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement {
   const { t } = useTranslation();
-  const { verge, patchVerge, mutateVerge } = useVerge();
   const { isAdminMode, isServiceMode } = useSystemState();
   const { installService: installServiceAction } = useServiceControls();
+  const {
+    updateProxyState,
+    isPendingConnecting,
+    isEnabledSystemProxy,
+    isEnabledTunMode,
+  } = useProxyState();
 
   const changeConnectionState = useConnectionState(
     (state) => state.changeConnectionState,
   );
-
-  const { enable_system_proxy, enable_tun_mode } = verge ?? {};
 
   const [systemProxyType, setSystemProxyType] = useState<TSystemProxy>(
     () =>
@@ -76,27 +79,9 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     });
   }, []);
 
-  const { mutateAsync: updateProxyState, isPending: isPendingConnecting } =
-    useMutation({
-      mutationFn: async (
-        proxyState: Pick<
-          IVergeConfig,
-          "enable_system_proxy" | "enable_tun_mode"
-        >,
-      ) => {
-        await intervalPromise(
-          (async () => {
-            await mutateVerge({ ...verge, ...proxyState }, false);
-            await patchVerge(proxyState);
-          })(),
-          2000,
-        );
-      },
-    });
-
   async function toggleConnection(e: MouseEvent) {
     e.preventDefault();
-    const isConnecting = !enable_system_proxy && !enable_tun_mode;
+    const isConnecting = !isEnabledSystemProxy && !isEnabledTunMode;
 
     if (isConnecting) {
       changeConnectionState("connecting");
@@ -111,8 +96,8 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     } else {
       await updateProxyState({
         enable_system_proxy:
-          systemProxyType === "system" && !enable_system_proxy,
-        enable_tun_mode: systemProxyType === "tun" && !enable_tun_mode,
+          systemProxyType === "system" && !isEnabledSystemProxy,
+        enable_tun_mode: systemProxyType === "tun" && !isEnabledTunMode,
       });
       changeConnectionState(isConnecting ? "connected" : "disconnected");
     }
@@ -122,13 +107,14 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     setSystemProxyType(e.target.value as TSystemProxy);
     localStorage.setItem(LOCAL_STORAGE_TAB_KEY, e.target.value);
 
-    if (enable_system_proxy || enable_tun_mode) {
+    if (isEnabledSystemProxy || isEnabledTunMode) {
       await updateProxyState({
         enable_system_proxy:
           e.target.value === "system" &&
-          (enable_system_proxy || enable_tun_mode),
+          (isEnabledSystemProxy || isEnabledTunMode),
         enable_tun_mode:
-          e.target.value === "tun" && (enable_system_proxy || enable_tun_mode),
+          e.target.value === "tun" &&
+          (isEnabledSystemProxy || isEnabledTunMode),
       });
     }
 
@@ -144,7 +130,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
       <button
         className={clsx(
           styles.connectionWidgetButton,
-          (enable_system_proxy || enable_tun_mode) &&
+          (isEnabledSystemProxy || isEnabledTunMode) &&
             styles.connectionWidgetButtonConnected,
         )}
         onClick={toggleConnection}
