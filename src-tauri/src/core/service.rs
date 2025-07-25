@@ -1107,7 +1107,7 @@ pub async fn force_reinstall_service() -> Result<()> {
                 logging!(info, Type::Service, true, "尝试检查macOS服务状态...");
 
                 let output = Command::new("launchctl")
-                    .args(["list", "io.github.clash-verge-rev.clash-verge-rev.service"])
+                    .args(["list", "io.github.spy-duck.spy-duck-desktop.service"])
                     .output();
 
                 match output {

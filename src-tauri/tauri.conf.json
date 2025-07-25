@@ -26,7 +26,7 @@
     "devUrl": "http://localhost:3000/"
   },
   "productName": "Spy Duck VPN",
-  "identifier": "io.github.clash-verge-rev.clash-verge-rev",
+  "identifier": "io.github.spy-duck.spy-duck-desktop",
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQyOEMyRjBCQkVGOUJEREYKUldUZnZmbStDeStNMHU5Mmo1N24xQXZwSVRYbXA2NUpzZE5oVzlqeS9Bc0t6RVV4MmtwVjBZaHgK",

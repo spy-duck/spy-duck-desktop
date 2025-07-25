@@ -1,24 +1,24 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "identifier": "io.github.clash-verge-rev.clash-verge-rev",
+  "identifier": "io.github.spy-duck.spy-duck-desktop",
   "bundle": {
     "targets": ["deb", "rpm"],
     "linux": {
       "deb": {
         "depends": ["openssl"],
-        "desktopTemplate": "./packages/linux/clash-verge.desktop",
-        "provides": ["clash-verge"],
-        "conflicts": ["clash-verge"],
-        "replaces": ["clash-verge"],
+        "desktopTemplate": "./packages/linux/spy-duck-desktop.desktop",
+        "provides": ["spy-duck-desktop"],
+        "conflicts": ["spy-duck-desktop"],
+        "replaces": ["spy-duck-desktop"],
         "postInstallScript": "./packages/linux/post-install.sh",
         "preRemoveScript": "./packages/linux/pre-remove.sh"
       },
       "rpm": {
         "depends": ["openssl"],
-        "desktopTemplate": "./packages/linux/clash-verge.desktop",
-        "provides": ["clash-verge"],
-        "conflicts": ["clash-verge"],
-        "obsoletes": ["clash-verge"],
+        "desktopTemplate": "./packages/linux/spy-duck-desktop.desktop",
+        "provides": ["spy-duck-desktop"],
+        "conflicts": ["spy-duck-desktop"],
+        "obsoletes": ["spy-duck-desktop"],
         "postInstallScript": "./packages/linux/post-install.sh",
         "preRemoveScript": "./packages/linux/pre-remove.sh"
       }

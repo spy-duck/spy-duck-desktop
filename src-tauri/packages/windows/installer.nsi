@@ -765,8 +765,8 @@ Section Install
   ; 删除 window-state.json 文件 .window-state.json 文件
   DetailPrint "开始删除删除 window-state.json or .window-state.json"
   SetShellVarContext current
-  Delete "$APPDATA\io.github.clash-verge-rev.clash-verge-rev\window-state.json"
-  Delete "$APPDATA\io.github.clash-verge-rev.clash-verge-rev\.window-state.json"
+  Delete "$APPDATA\io.github.spy-duck.spy-duck-desktop\window-state.json"
+  Delete "$APPDATA\io.github.spy-duck.spy-duck-desktop\.window-state.json"
 
   ; 清理自启动注册表项
   DetailPrint "Cleaning auto-launch registry entries..."
@@ -926,8 +926,8 @@ Section Uninstall
   ; 删除 window-state.json 文件 .window-state.json 文件
   DetailPrint "开始删除删除 window-state.json or .window-state.json"
   SetShellVarContext current
-  Delete "$APPDATA\io.github.clash-verge-rev.clash-verge-rev\window-state.json"
-  Delete "$APPDATA\io.github.clash-verge-rev.clash-verge-rev\.window-state.json"
+  Delete "$APPDATA\io.github.spy-duck.spy-duck-desktop\window-state.json"
+  Delete "$APPDATA\io.github.spy-duck.spy-duck-desktop\.window-state.json"
 
   ; 清理自启动注册表项
   DetailPrint "Cleaning auto-launch registry entries..."
