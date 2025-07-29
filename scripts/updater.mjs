@@ -200,14 +200,14 @@ async function processRelease(github, options, tag, isAlpha) {
     // Generate a proxy update file for accelerated GitHub resources
     const updateDataNew = JSON.parse(JSON.stringify(updateData));
 
-    Object.entries(updateDataNew.platforms).forEach(([key, value]) => {
-      if (value.url) {
-        updateDataNew.platforms[key].url =
-          "https://download.clashverge.dev/" + value.url;
-      } else {
-        console.log(`[Error]: updateDataNew.platforms.${key} is null`);
-      }
-    });
+    // Object.entries(updateDataNew.platforms).forEach(([key, value]) => {
+    //   if (value.url) {
+    //     updateDataNew.platforms[key].url =
+    //       "https://download.clashverge.dev/" + value.url;
+    //   } else {
+    //     console.log(`[Error]: updateDataNew.platforms.${key} is null`);
+    //   }
+    // });
 
     // Get the appropriate updater release based on isAlpha flag
     const releaseTag = isAlpha ? ALPHA_TAG_NAME : UPDATE_TAG_NAME;

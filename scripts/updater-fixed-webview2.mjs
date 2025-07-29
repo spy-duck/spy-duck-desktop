@@ -97,14 +97,14 @@ async function resolveUpdater() {
   // 使用 https://hub.fastgit.xyz/ 做github资源的加速
   const updateDataNew = JSON.parse(JSON.stringify(updateData));
 
-  Object.entries(updateDataNew.platforms).forEach(([key, value]) => {
-    if (value.url) {
-      updateDataNew.platforms[key].url =
-        "https://download.clashverge.dev/" + value.url;
-    } else {
-      console.log(`[Error]: updateDataNew.platforms.${key} is null`);
-    }
-  });
+  // Object.entries(updateDataNew.platforms).forEach(([key, value]) => {
+  //   if (value.url) {
+  //     updateDataNew.platforms[key].url =
+  //       "https://download.spy-duck.com/" + value.url;
+  //   } else {
+  //     console.log(`[Error]: updateDataNew.platforms.${key} is null`);
+  //   }
+  // });
 
   // update the update.json
   const { data: updateRelease } = await github.rest.repos.getReleaseByTag({
