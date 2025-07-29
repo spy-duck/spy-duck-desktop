@@ -1,5 +1,5 @@
 {
-  "version": "0.0.5",
+  "version": "0.0.6",
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "bundle": {
     "active": true,
@@ -11,15 +11,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [
-      "resources",
-      "resources/locales/*"
-    ],
+    "resources": ["resources", "resources/locales/*"],
     "publisher": "Spy Duck VPN",
-    "externalBin": [
-      "sidecar/verge-mihomo",
-      "sidecar/verge-mihomo-alpha"
-    ],
+    "externalBin": ["sidecar/verge-mihomo", "sidecar/verge-mihomo-alpha"],
     "copyright": "GNU General Public License v3.0",
     "category": "DeveloperTool",
     "shortDescription": "Spy Duck VPN",
@@ -37,12 +31,9 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlEODE5RURCMDMzNUFBNUEKUldSYXFqVUQyNTZCblRNU3k1b2E4TWdZU08rb0hMVmpVdmE0cnQ0S1FUQzdUS2w3cVNGTHRDK0oK",
       "endpoints": [
-        "https://download.clashverge.dev/https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater/update-proxy.json",
-        "https://gh-proxy.com/https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater/update-proxy.json",
-        "https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater/update.json",
-        "https://download.clashverge.dev/https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater-alpha/update-alpha-proxy.json",
-        "https://gh-proxy.com/https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater-alpha/update-alpha-proxy.json",
-        "https://github.com/clash-verge-rev/clash-verge-rev/releases/download/updater-alpha/update-alpha.json"
+        "https://gh-proxy.com/https://github.com/spy-duck/spy-duck-desktop/releases/download/updater/update.json",
+        "https://github.com/spy-duck/spy-duck-desktop/releases/download/updater/update.json",
+        "https://gitlab.com/spy-duck/version/-/raw/main/update.json"
       ],
       "windows": {
         "installMode": "basicUi"
@@ -50,26 +41,15 @@
     },
     "deep-link": {
       "desktop": {
-        "schemes": [
-          "clash",
-          "clash-verge",
-          "spyduck"
-        ]
+        "schemes": ["clash", "clash-verge", "spyduck"]
       }
     }
   },
   "app": {
     "security": {
-      "capabilities": [
-        "desktop-capability",
-        "migrated"
-      ],
+      "capabilities": ["desktop-capability", "migrated"],
       "assetProtocol": {
-        "scope": [
-          "$APPDATA/**",
-          "$RESOURCE/../**",
-          "**"
-        ],
+        "scope": ["$APPDATA/**", "$RESOURCE/../**", "**"],
         "enable": true
       },
       "csp": null

@@ -13,6 +13,8 @@ import { AppFooter } from "@ui/widgets/app-footer";
 import { useConnectionState } from "@ui/state/connection";
 import { ModalsProvider } from "@ui/components/modal/modals-global.ctx";
 import styles from "./layout.module.scss";
+import getSystem from "@/utils/get-system";
+import clsx from "clsx";
 
 const SvgSprite = React.lazy(() => import("@ui/components/svg-sprite"));
 
@@ -20,6 +22,8 @@ const queryClient = new QueryClient();
 
 // TODO: change to global lang
 z.config(z.locales.ru());
+
+const OS = getSystem();
 
 export function UILayout() {
   const routes = useRoutes(UIRoutes);
@@ -46,7 +50,7 @@ export function UILayout() {
       <NoticeManager />
       <BaseErrorBoundary>
         <ModalsProvider>
-          <div className={styles.layout}>
+          <div className={clsx(styles.layout, `os-${OS}`)}>
             {isAuthorized && (
               <div className={styles.layoutHeader}>
                 <AppHeader />

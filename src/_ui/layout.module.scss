@@ -1,8 +1,8 @@
 @use "sass:color";
 
 @font-face {
-  font-family: "twemoji mozilla";
-  src: url("../assets/fonts/Twemoji.Mozilla.ttf");
+  font-family: 'twemoji mozilla';
+  src: url('assets/fonts/Twemoji.Mozilla.ttf') format('truetype');
 }
 
 @font-face {
@@ -66,6 +66,14 @@
   --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
   --shadow-sm: 0 1px 8px rgba(0, 0, 0, 0.25);
   --shadow-xl: 0 0 40px rgba(0, 0, 0, 0.3);
+
+  --font-family:
+    "SF Pro", "Roboto", "JetBrains Mono", sans-serif, "Apple Color Emoji";
+}
+
+:global(.os-windows) {
+  --font-family:
+    "SF Pro", "Roboto", "JetBrains Mono", sans-serif, "Apple Color Emoji", "twemoji mozilla";
 }
 
 * {
@@ -92,9 +100,7 @@ body {
   display: flex;
   flex-direction: column;
 
-  font-family:
-    "SF Pro", "JetBrains Mono", "Roboto Mono", monospace, sans-serif,
-    "Apple Color Emoji", "twemoji mozilla";
+  font-family: var(--font-family), sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.4;

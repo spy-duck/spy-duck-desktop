@@ -1,6 +1,6 @@
 [package]
 name = "spy-duck-desktop"
-version = "0.0.5"
+version = "0.0.6"
 description = "Spy Duck VPN desktop client"
 authors = ["SpyDuck"]
 license = "GPL-3.0-only"

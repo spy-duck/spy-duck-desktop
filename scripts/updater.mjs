@@ -11,6 +11,7 @@ const ALPHA_TAG_NAME = "updater-alpha";
 const ALPHA_UPDATE_JSON_FILE = "update.json";
 const ALPHA_UPDATE_JSON_PROXY = "update-proxy.json";
 
+
 /// generate update.json
 /// upload to update tag's release asset
 async function resolveUpdater() {
@@ -111,7 +112,7 @@ async function processRelease(github, options, tag, isAlpha) {
 
     const promises = release.assets.map(async (asset) => {
       const { name, browser_download_url } = asset;
-
+      console.log({ name, browser_download_url });
       // Process all the platform URL and signature data
       // win64 url
       if (name.endsWith("x64-setup.exe")) {
