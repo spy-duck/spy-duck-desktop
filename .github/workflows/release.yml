@@ -7,7 +7,7 @@ on:
   push:
     # 应当限制在 main 分支上触发发布。
     branches:
-      - main
+      - new-ui
     # 应当限制 v*.*.* 的 tag 触发发布。
     tags:
       - "v*.*.*"
@@ -18,7 +18,7 @@ env:
 concurrency:
   # only allow per workflow per commit (and not pr) to run at a time
   group: "${{ github.workflow }} - ${{ github.head_ref || github.ref }}"
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/new-ui' }}
 
 jobs:
   check_tag_version:
@@ -51,10 +51,10 @@ jobs:
             target: x86_64-pc-windows-msvc
           - os: windows-latest
             target: aarch64-pc-windows-msvc
-          - os: macos-latest
-            target: aarch64-apple-darwin
-          - os: macos-latest
-            target: x86_64-apple-darwin
+          #          - os: macos-latest
+          #            target: aarch64-apple-darwin
+          #          - os: macos-latest
+          #            target: x86_64-apple-darwin
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
 
@@ -111,7 +111,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: v__VERSION__
-          releaseName: "Clash Verge Rev v__VERSION__"
+          releaseName: "SpyDuck client v__VERSION__"
           releaseBody: "More new features are now supported."
           tauriScript: pnpm
           args: --target ${{ matrix.target }}
@@ -231,7 +231,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{env.VERSION}}
-          name: "Clash Verge Rev v${{env.VERSION}}"
+          name: "SpyDuck client v${{env.VERSION}}"
           body: "More new features are now supported."
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
@@ -322,7 +322,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{steps.build.outputs.appVersion}}
-          name: "Clash Verge Rev v${{steps.build.outputs.appVersion}}"
+          name: "SpyDuck client v${{steps.build.outputs.appVersion}}"
           body: "More new features are now supported."
           token: ${{ secrets.GITHUB_TOKEN }}
           files: src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*setup*
@@ -382,26 +382,25 @@ jobs:
         run: pnpm updater-fixed-webview2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  submit-to-winget:
-    name: Submit to Winget
-    runs-on: ubuntu-latest
-    needs: [release-update]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Get Version
-        run: |
-          sudo apt-get update
-          sudo apt-get install jq
-          echo "VERSION=$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
-      - name: Submit to Winget
-        uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: ClashVergeRev.ClashVergeRev
-          version: ${{env.VERSION}}
-          release-tag: v${{env.VERSION}}
-          installers-regex: '_(arm64|x64|x86)-setup\.exe$'
-          token: ${{ secrets.WINGET_TOKEN  }}
+#  submit-to-winget:
+#    name: Submit to Winget
+#    runs-on: ubuntu-latest
+#    needs: [release-update]
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#      - name: Get Version
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install jq
+#          echo "VERSION=$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
+#      - name: Submit to Winget
+#        uses: vedantmgoyal9/winget-releaser@main
+#        with:
+#          identifier: ClashVergeRev.ClashVergeRev
+#          version: ${{env.VERSION}}
+#          release-tag: v${{env.VERSION}}
+#          installers-regex: '_(arm64|x64|x86)-setup\.exe$'
+#          token: ${{ secrets.WINGET_TOKEN  }}

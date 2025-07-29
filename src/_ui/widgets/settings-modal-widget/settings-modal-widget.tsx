@@ -15,8 +15,8 @@ import { DialogRef } from "@/components/base";
 import { UpdateViewer } from "@/components/setting/mods/update-viewer";
 import { useTranslation } from "react-i18next";
 import { useClashInfo } from "@/hooks/use-clash";
-import { useRequest } from "ahooks";
 import { PortSettingsModal } from "@ui/widgets/settings-modal-widget/port-settings-modal";
+import { updateGeoData } from "@/services/api";
 
 type SettingsModalWidgetProps = ModalProps;
 
@@ -51,6 +51,7 @@ export function SettingsModalWidget({
   async function handlerClickCheckUpdates(
     e: React.MouseEvent<HTMLButtonElement>,
   ) {
+    e.preventDefault();
     try {
       const info = await checkUpdate();
       if (!info?.available) {
@@ -86,6 +87,16 @@ export function SettingsModalWidget({
     }
   }
 
+  async function handlerClickUpdateGeo(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    try {
+      await updateGeoData();
+      showNotice("success", t("GeoData Updated"));
+    } catch (err: any) {
+      showNotice("error", err?.response.data.message || err.toString());
+    }
+  }
+
   return (
     <Modal {...modalProps} size="small" showCloseButton>
       <Modal.Header>Настройки</Modal.Header>
@@ -118,6 +129,7 @@ export function SettingsModalWidget({
               </div>
             </Flex>
           </ListItem>
+          <ListItem onClick={handlerClickUpdateGeo}>Обновить GeoData</ListItem>
           <ListItem onClick={handlerClickCheckUpdates}>
             Проверить обновление
           </ListItem>

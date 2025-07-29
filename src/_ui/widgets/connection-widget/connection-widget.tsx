@@ -14,7 +14,7 @@ import { useProxyState } from "@ui/hooks/use-proxy-state";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
-type TSystemProxy = "system" | "tun";
+type TSystemProxy = "system" | "tun" | "combine";
 
 type ConnectionButtonProps = {};
 
@@ -89,18 +89,28 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
 
     if (
       isConnecting &&
-      systemProxyType === "tun" &&
+      (systemProxyType === "tun" || systemProxyType === "combine") &&
       (isSidecarMode || !isTunAvailable)
     ) {
       installService();
-    } else {
+      return;
+    }
+
+    if (isConnecting) {
       await updateProxyState({
         enable_system_proxy:
-          systemProxyType === "system" && !isEnabledSystemProxy,
-        enable_tun_mode: systemProxyType === "tun" && !isEnabledTunMode,
+          systemProxyType === "combine" || systemProxyType === "system",
+        enable_tun_mode:
+          systemProxyType === "combine" || systemProxyType === "tun",
       });
-      changeConnectionState(isConnecting ? "connected" : "disconnected");
+      changeConnectionState("connected");
+      return;
     }
+    await updateProxyState({
+      enable_system_proxy: false,
+      enable_tun_mode: false,
+    });
+    changeConnectionState("disconnected");
   }
 
   async function toggleSystemProxyType(e: ChangeEvent<HTMLInputElement>) {
@@ -110,15 +120,16 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     if (isEnabledSystemProxy || isEnabledTunMode) {
       await updateProxyState({
         enable_system_proxy:
-          e.target.value === "system" &&
-          (isEnabledSystemProxy || isEnabledTunMode),
+          e.target.value === "combine" ||
+          (e.target.value === "system" &&
+            (isEnabledSystemProxy || isEnabledTunMode)),
         enable_tun_mode:
-          e.target.value === "tun" &&
+          (e.target.value === "combine" || e.target.value === "tun") &&
           (isEnabledSystemProxy || isEnabledTunMode),
       });
     }
 
-    if (e.target.value === "tun") {
+    if (e.target.value === "tun" || e.target.value === "combine") {
       await updateLocalStatus();
     }
   }
@@ -168,7 +179,19 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
         </div>
         <div className={styles.connectionWidgetProxySwitcherVariants}>
           <label>
-            {t("System Proxy")}
+            VPN сервис
+            <input
+              type="radio"
+              name="system_proxy_type"
+              value="tun"
+              onChange={toggleSystemProxyType}
+              checked={systemProxyType === "tun"}
+              disabled={isPendingConnecting || isPendingInstallService}
+            />
+          </label>
+
+          <label>
+            Прокси
             <input
               type="radio"
               name="system_proxy_type"
@@ -180,13 +203,13 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
           </label>
 
           <label>
-            VPN сервис
+            Совместный
             <input
               type="radio"
               name="system_proxy_type"
-              value="tun"
+              value="combine"
               onChange={toggleSystemProxyType}
-              checked={systemProxyType === "tun"}
+              checked={systemProxyType === "combine"}
               disabled={isPendingConnecting || isPendingInstallService}
             />
           </label>

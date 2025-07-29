@@ -48,11 +48,11 @@ $chartWidth: 120px;
 
   &-stats {
     display: flex;
-    gap: 0.5em;
+    gap: 1em;
     padding: 1em;
 
     &-digit {
-      width: 40px;
+      min-width: 32px;
       text-align: right;
     }
 

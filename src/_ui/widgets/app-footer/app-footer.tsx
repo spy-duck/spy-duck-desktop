@@ -9,6 +9,7 @@ import parseTraffic from "@/utils/parse-traffic";
 import { Icon } from "@ui/components/icon";
 import { useConnectionState } from "@ui/state/connection";
 import styles from "./app-footer.module.scss";
+import { Flex } from "@ui/components/flex";
 
 type AppFooterProps = {};
 
@@ -88,13 +89,16 @@ function Traffic() {
   return (
     <div className={styles.traffic}>
       <div className={styles.trafficStats}>
-        <Icon name="arrow-up" />
-        <div className={styles.trafficStatsDigit}>{up}</div>
-        <div className={styles.trafficStatsUnit}>{upUnit}/s</div>
-
-        <Icon name="arrow-down" />
-        <div className={styles.trafficStatsDigit}>{down}</div>
-        <div className={styles.trafficStatsUnit}>{downUnit}/s</div>
+        <Flex gap={4}>
+          <Icon name="arrow-up" />
+          <div className={styles.trafficStatsDigit}>{up}</div>
+          <div className={styles.trafficStatsUnit}>{upUnit}/s</div>
+        </Flex>
+        <Flex gap={4}>
+          <Icon name="arrow-down" />
+          <div className={styles.trafficStatsDigit}>{down}</div>
+          <div className={styles.trafficStatsUnit}>{downUnit}/s</div>
+        </Flex>
       </div>
       <div
         className={clsx(
