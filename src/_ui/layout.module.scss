@@ -1,6 +1,11 @@
 @use "sass:color";
 
 @font-face {
+  font-family: "twemoji mozilla";
+  src: url("../assets/fonts/Twemoji.Mozilla.ttf");
+}
+
+@font-face {
   font-family: "SF Pro";
   src:
     local("SF Pro"),
@@ -87,7 +92,9 @@ body {
   display: flex;
   flex-direction: column;
 
-  font-family: "SF Pro", sans-serif;
+  font-family:
+    "SF Pro", "JetBrains Mono", "Roboto Mono", monospace, sans-serif,
+    "Apple Color Emoji", "twemoji mozilla";
   font-size: 14px;
   font-weight: 400;
   line-height: 1.4;
@@ -112,11 +119,4 @@ body {
 
   &-footer {
   }
-}
-
-:global(.twemoji) {
-  height: 1.1em;
-  width: 1.1em;
-  margin: 0 0.05em 0 0.1em;
-  vertical-align: -0.2em;
 }

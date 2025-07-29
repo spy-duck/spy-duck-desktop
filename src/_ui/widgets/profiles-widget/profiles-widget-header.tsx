@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 import { intervalPromise } from "@ui/utils/interval-promise";
 import { updateProfile } from "@/services/cmds";
 import { showNotice } from "@/services/noticeService";
-import Twemoji from "react-twemoji";
 
 type ProfilesWidgetHeaderProps = {
   subscription: IProfileItem | undefined;
@@ -42,9 +41,7 @@ export function ProfilesWidgetHeader({
     <header className={styles.profilesWidgetSubscriptionHeader}>
       <div className={styles.profilesWidgetSubscriptionHeaderInner}>
         <div className={styles.profilesWidgetSubscriptionHeaderTitle}>
-          <Twemoji options={{ className: "twemoji" }}>
-            {subscription?.name}
-          </Twemoji>
+          {subscription?.name}
         </div>
         <div className={styles.profilesWidgetSubscriptionHeaderParams}>
           <div>

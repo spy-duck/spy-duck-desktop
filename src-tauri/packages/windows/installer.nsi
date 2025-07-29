@@ -1059,8 +1059,7 @@ Section Uninstall
   ; Delete the specified registry path
   DeleteRegKey HKLM "Software\Spy Duck VPN"
   DeleteRegKey HKCU "Software\Spy Duck VPN"
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ClashVerge"
-  DeleteRegKey HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Clash Verge"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Spy Duck VPN"
 
   ; 清理 Uninstall 信息
   StrCpy $R1 0
