@@ -1035,30 +1035,30 @@ Section Uninstall
   RMDir /r /REBOOTOK "$SMPROGRAMS\$AppStartMenuFolder"
 
   ; 删除系统级开始菜单中的 Clash Verge
-  Delete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Clash Verge\Spy Duck VPN.lnk"
-  Delete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Clash Verge\spy-duck-desktop.lnk"
+  Delete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Spy Duck VPN\Spy Duck VPN.lnk"
+  Delete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Spy Duck VPN\spy-duck-desktop.lnk"
   RMDir /r /REBOOTOK "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Spy Duck VPN"
 
-  ; 删除所有带 Clash Verge 或 clash-verge 的注册表项
-  DetailPrint "开始清理所有 Clash Verge 相关的注册表项..."
+  ; Delete all registry entries with Clash Verge or clash-verge
+  DetailPrint "Start cleaning all Spy Duck VPN related registry entries..."
 
-  ; 设置注册表查看模式 (64位)
+  ; Set registry viewing mode (64-bit)
   SetRegView 64
 
-  ; 清理 CurrentVersion\Run 中的自启动项
+  ; Clean up the startup items in CurrentVersion\Run
   StrCpy $R1 "Software\Microsoft\Windows\CurrentVersion\Run"
   DeleteRegValue HKCU "$R1" "Spy Duck VPN"
-  DeleteRegValue HKCU "$R1" "clash-verge"
+  DeleteRegValue HKCU "$R1" "spy-duck-desktop"
   DeleteRegValue HKLM "$R1" "Spy Duck VPN"
-  DeleteRegValue HKLM "$R1" "clash-verge"
+  DeleteRegValue HKLM "$R1" "spy-duck-desktop"
 
-  ; 清理 App Paths
+  ; Clean up App Paths
   DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Spy Duck VPN.exe"
-  DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\clash-verge.exe"
+  DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\spy-duck-desktop.exe"
 
-  ; 删除指定的注册表路径
-  DeleteRegKey HKLM "Software\Clash Verge Rev"
-  DeleteRegKey HKCU "Software\Clash Verge Rev"
+  ; Delete the specified registry path
+  DeleteRegKey HKLM "Software\Spy Duck VPN"
+  DeleteRegKey HKCU "Software\Spy Duck VPN"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ClashVerge"
   DeleteRegKey HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Clash Verge"
 
@@ -1072,8 +1072,8 @@ Section Uninstall
 
     ReadRegStr $R3 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$R2" "DisplayName"
     ${If} $R3 != ""
-      StrCmp $R3 "Clash Verge" 0 +3
-      StrCmp $R3 "clash-verge" 0 +2
+      StrCmp $R3 "Spy Duck VPN" 0 +3
+      StrCmp $R3 "spy-duck-desktop" 0 +2
       DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$R2"
     ${EndIf}
 
@@ -1092,7 +1092,7 @@ Section Uninstall
     ReadRegStr $R3 HKCU "SOFTWARE\$R2" ""
     ${If} $R3 != ""
       StrCmp $R3 "Spy Duck VPN" 0 +3
-      StrCmp $R3 "clash-verge" 0 +2
+      StrCmp $R3 "spy-duck-desktop" 0 +2
       DeleteRegKey HKCU "SOFTWARE\$R2"
     ${EndIf}
 
@@ -1111,7 +1111,7 @@ Section Uninstall
     ReadRegStr $R3 HKLM "SOFTWARE\$R2" ""
     ${If} $R3 != ""
       StrCmp $R3 "Spy Duck VPN" 0 +3
-      StrCmp $R3 "clash-verge" 0 +2
+      StrCmp $R3 "spy-duck-desktop" 0 +2
       DeleteRegKey HKLM "SOFTWARE\$R2"
     ${EndIf}
 

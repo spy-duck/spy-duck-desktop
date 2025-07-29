@@ -1,15 +1,15 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.4",
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "bundle": {
     "active": true,
     "longDescription": "Spy Duck VPN",
     "icon": [
-      "icons/spy_duck/32x32.png",
-      "icons/spy_duck/128x128.png",
-      "icons/spy_duck/128x128@2x.png",
-      "icons/spy_duck/icon.icns",
-      "icons/spy_duck/icon.ico"
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
     ],
     "resources": [
       "resources",
