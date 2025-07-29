@@ -2,9 +2,10 @@ import { ListItem } from "@ui/components/list";
 import delayManager from "@/services/delay";
 import { TProxy, TProxyGroup } from "@/_ui/types/proxy";
 import { ProfilesWidgetContext } from "@ui/widgets/profiles-widget/profiles-widget";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import styles from "./profiles-widget.module.scss";
 import { useQuery } from "@tanstack/react-query";
+import Twemoji from "react-twemoji";
 
 function convertDelayColor(delayValue: number) {
   const colorStr = delayManager.formatDelayColor(delayValue);
@@ -66,7 +67,9 @@ export function ProfilesWidgetItem({
       onClick={handlerClickProxy}
     >
       <div className={styles.profilesWidgetProxy}>
-        <div className={styles.profilesWidgetProxyName}>{proxy.name}</div>
+        <div className={styles.profilesWidgetProxyName}>
+          <Twemoji options={{ className: "twemoji" }}>{proxy.name}</Twemoji>
+        </div>
         <div
           role="button"
           className={styles.profilesWidgetProxyDelay}

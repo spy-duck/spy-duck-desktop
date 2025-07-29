@@ -10,6 +10,7 @@ import { isNumber } from "lodash-es";
 import { formatTraffic } from "@ui/utils/format-traffic";
 import styles from "./app-header.module.scss";
 import { Icon } from "@ui/components/icon";
+import Twemoji from "react-twemoji";
 
 export function AppHeaderSubscriptionInfo() {
   const { t } = useTranslation();
@@ -38,7 +39,9 @@ export function AppHeaderSubscriptionInfo() {
   return (
     <div className={styles.appHeaderSubscription}>
       <div className={styles.appHeaderSubscriptionInner}>
-        <div className={styles.appHeaderSubscriptionTitle}>{current?.name}</div>
+        <div className={styles.appHeaderSubscriptionTitle}>
+          <Twemoji options={{ className: "twemoji" }}>{current?.name}</Twemoji>
+        </div>
         <div className={styles.appHeaderSubscriptionParams}>
           <div>
             Истекает:{" "}
