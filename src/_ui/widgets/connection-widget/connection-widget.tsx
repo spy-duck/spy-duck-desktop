@@ -1,5 +1,4 @@
-import React, { useState, MouseEvent, ChangeEvent, useEffect } from "react";
-import { useVerge } from "@/hooks/use-verge";
+import React, { MouseEvent, ChangeEvent, useEffect } from "react";
 import { useSystemState } from "@/hooks/use-system-state";
 import styles from "./connection-widget.module.scss";
 import clsx from "clsx";
@@ -11,10 +10,13 @@ import { useConnectionState } from "@ui/state/connection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServiceControls } from "@ui/hooks/use-service-controls";
 import { useProxyState } from "@ui/hooks/use-proxy-state";
+import {
+  getConnectionMode,
+  setConnectionMode,
+  TConnectionMode,
+} from "@ui/commands/duck.commands";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
-
-type TSystemProxy = "system" | "tun" | "combine";
 
 type ConnectionButtonProps = {};
 
@@ -29,15 +31,12 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     isEnabledTunMode,
   } = useProxyState();
 
-  const changeConnectionState = useConnectionState(
-    (state) => state.changeConnectionState,
-  );
+  const connectionState = useConnectionState((state) => state.connectionState);
 
-  const [systemProxyType, setSystemProxyType] = useState<TSystemProxy>(
-    () =>
-      (localStorage.getItem(LOCAL_STORAGE_TAB_KEY) as TSystemProxy | null) ||
-      "system",
-  );
+  const { data: connectionMode, refetch: refetchConnectionMode } = useQuery({
+    queryKey: ["connectionMode"],
+    queryFn: () => getConnectionMode(),
+  });
 
   const { data: runningMode, refetch: refetchRunningMode } = useQuery({
     queryKey: ["runningMode"],
@@ -56,7 +55,6 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
             enable_system_proxy: false,
             enable_tun_mode: true,
           });
-          changeConnectionState("connected");
         }
       },
     });
@@ -83,13 +81,9 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     e.preventDefault();
     const isConnecting = !isEnabledSystemProxy && !isEnabledTunMode;
 
-    if (isConnecting) {
-      changeConnectionState("connecting");
-    }
-
     if (
       isConnecting &&
-      (systemProxyType === "tun" || systemProxyType === "combine") &&
+      (connectionMode === "tun" || connectionMode === "combine") &&
       (isSidecarMode || !isTunAvailable)
     ) {
       installService();
@@ -99,22 +93,21 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     if (isConnecting) {
       await updateProxyState({
         enable_system_proxy:
-          systemProxyType === "combine" || systemProxyType === "system",
+          connectionMode === "combine" || connectionMode === "system",
         enable_tun_mode:
-          systemProxyType === "combine" || systemProxyType === "tun",
+          connectionMode === "combine" || connectionMode === "tun",
       });
-      changeConnectionState("connected");
       return;
     }
     await updateProxyState({
       enable_system_proxy: false,
       enable_tun_mode: false,
     });
-    changeConnectionState("disconnected");
   }
 
   async function toggleSystemProxyType(e: ChangeEvent<HTMLInputElement>) {
-    setSystemProxyType(e.target.value as TSystemProxy);
+    await setConnectionMode(e.target.value as TConnectionMode);
+    await refetchConnectionMode();
     localStorage.setItem(LOCAL_STORAGE_TAB_KEY, e.target.value);
 
     if (isEnabledSystemProxy || isEnabledTunMode) {
@@ -136,6 +129,8 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
 
   const isSidecarMode = runningMode === "Sidecar";
 
+  const isConnecting = isPendingConnecting || connectionState == "connecting";
+
   return (
     <div className={styles.connectionWidget}>
       <button
@@ -145,12 +140,12 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
             styles.connectionWidgetButtonConnected,
         )}
         onClick={toggleConnection}
-        disabled={isPendingConnecting || isPendingInstallService}
+        disabled={isConnecting || isPendingInstallService}
       >
         <Icon
-          name={isPendingConnecting ? "loader" : "power-off"}
-          type={isPendingConnecting ? "light" : "regular"}
-          rotate={isPendingConnecting}
+          name={isConnecting ? "loader" : "power-off"}
+          type={isConnecting ? "light" : "regular"}
+          rotate={isConnecting}
         />
       </button>
 
@@ -171,7 +166,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
           <div className={styles.connectionWidgetProxySwitcherLabelPopup}>
             <Icon name="circle-info" />
             <p style={{ maxWidth: 300 }}>
-              {systemProxyType === "system"
+              {connectionMode === "system"
                 ? t("System Proxy Info")
                 : t("TUN Mode Intercept Info")}
             </p>
@@ -185,8 +180,8 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               name="system_proxy_type"
               value="tun"
               onChange={toggleSystemProxyType}
-              checked={systemProxyType === "tun"}
-              disabled={isPendingConnecting || isPendingInstallService}
+              checked={connectionMode === "tun"}
+              disabled={isConnecting || isPendingInstallService}
             />
           </label>
 
@@ -197,8 +192,8 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               name="system_proxy_type"
               value="system"
               onChange={toggleSystemProxyType}
-              checked={systemProxyType === "system"}
-              disabled={isPendingConnecting || isPendingInstallService}
+              checked={connectionMode === "system"}
+              disabled={isConnecting || isPendingInstallService}
             />
           </label>
 
@@ -209,8 +204,8 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               name="system_proxy_type"
               value="combine"
               onChange={toggleSystemProxyType}
-              checked={systemProxyType === "combine"}
-              disabled={isPendingConnecting || isPendingInstallService}
+              checked={connectionMode === "combine"}
+              disabled={isConnecting || isPendingInstallService}
             />
           </label>
         </div>

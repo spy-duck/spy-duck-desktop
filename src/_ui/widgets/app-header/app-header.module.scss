@@ -89,5 +89,11 @@
         color: var(--grey-500);
       }
     }
+
+    &-expire {
+      &--expiried {
+        color: var(--red);
+      }
+    }
   }
 }

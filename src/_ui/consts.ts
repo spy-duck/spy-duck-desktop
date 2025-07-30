@@ -17,3 +17,6 @@ export const DEV_URLS = [
   "http://tauri.localhost",
   "http://localhost:3000",
 ];
+
+export const EVENT_CHANGE_CONNECTION_STATE =
+  "duck:change_connection_state" as const;

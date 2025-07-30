@@ -3,14 +3,17 @@ use tauri::tray::TrayIconBuilder;
 #[cfg(target_os = "macos")]
 pub mod speed_rate;
 use crate::{
-    cmd,
+    // cmd,
     config::Config,
-    feat, logging,
+    feat,
+    logging,
     module::{lightweight::is_in_lightweight_mode, mihomo::Rate},
     utils::{dirs::find_target_icons, i18n::t, resolve::VERSION},
     Type,
 };
 
+use super::handle;
+use crate::module::duck;
 use anyhow::Result;
 use parking_lot::Mutex;
 use std::{
@@ -23,8 +26,6 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconEvent},
     AppHandle, Wry,
 };
-
-use super::handle;
 
 #[derive(Clone)]
 struct TrayState {}
@@ -528,10 +529,10 @@ fn create_tray_menu(
     profile_uid_and_name: Vec<(String, String)>,
     is_lightweight_mode: bool,
 ) -> Result<tauri::menu::Menu<Wry>> {
-    let mode = mode.unwrap_or("");
+    // let mode = mode.unwrap_or("");
 
-    let unknown_version = String::from("unknown");
-    let version = VERSION.get().unwrap_or(&unknown_version);
+    // let unknown_version = String::from("unknown");
+    // let version = VERSION.get().unwrap_or(&unknown_version);
 
     let hotkeys = Config::verge()
         .latest_ref()
@@ -581,35 +582,35 @@ fn create_tray_menu(
     )
     .unwrap();
 
-    let rule_mode = &CheckMenuItem::with_id(
-        app_handle,
-        "rule_mode",
-        t("Rule Mode"),
-        true,
-        mode == "rule",
-        hotkeys.get("clash_mode_rule").map(|s| s.as_str()),
-    )
-    .unwrap();
-
-    let global_mode = &CheckMenuItem::with_id(
-        app_handle,
-        "global_mode",
-        t("Global Mode"),
-        true,
-        mode == "global",
-        hotkeys.get("clash_mode_global").map(|s| s.as_str()),
-    )
-    .unwrap();
-
-    let direct_mode = &CheckMenuItem::with_id(
-        app_handle,
-        "direct_mode",
-        t("Direct Mode"),
-        true,
-        mode == "direct",
-        hotkeys.get("clash_mode_direct").map(|s| s.as_str()),
-    )
-    .unwrap();
+    // let rule_mode = &CheckMenuItem::with_id(
+    //     app_handle,
+    //     "rule_mode",
+    //     t("Rule Mode"),
+    //     true,
+    //     mode == "rule",
+    //     hotkeys.get("clash_mode_rule").map(|s| s.as_str()),
+    // )
+    // .unwrap();
+    //
+    // let global_mode = &CheckMenuItem::with_id(
+    //     app_handle,
+    //     "global_mode",
+    //     t("Global Mode"),
+    //     true,
+    //     mode == "global",
+    //     hotkeys.get("clash_mode_global").map(|s| s.as_str()),
+    // )
+    // .unwrap();
+    //
+    // let direct_mode = &CheckMenuItem::with_id(
+    //     app_handle,
+    //     "direct_mode",
+    //     t("Direct Mode"),
+    //     true,
+    //     mode == "direct",
+    //     hotkeys.get("clash_mode_direct").map(|s| s.as_str()),
+    // )
+    // .unwrap();
 
     let profiles = &Submenu::with_id_and_items(
         app_handle,
@@ -640,54 +641,54 @@ fn create_tray_menu(
     )
     .unwrap();
 
-    let lighteweight_mode = &CheckMenuItem::with_id(
-        app_handle,
-        "entry_lightweight_mode",
-        t("LightWeight Mode"),
-        true,
-        is_lightweight_mode,
-        hotkeys.get("entry_lightweight_mode").map(|s| s.as_str()),
-    )
-    .unwrap();
-
-    let copy_env =
-        &MenuItem::with_id(app_handle, "copy_env", t("Copy Env"), true, None::<&str>).unwrap();
-
-    let open_app_dir = &MenuItem::with_id(
-        app_handle,
-        "open_app_dir",
-        t("Conf Dir"),
-        true,
-        None::<&str>,
-    )
-    .unwrap();
-
-    let open_core_dir = &MenuItem::with_id(
-        app_handle,
-        "open_core_dir",
-        t("Core Dir"),
-        true,
-        None::<&str>,
-    )
-    .unwrap();
-
-    let open_logs_dir = &MenuItem::with_id(
-        app_handle,
-        "open_logs_dir",
-        t("Logs Dir"),
-        true,
-        None::<&str>,
-    )
-    .unwrap();
-
-    let open_dir = &Submenu::with_id_and_items(
-        app_handle,
-        "open_dir",
-        t("Open Dir"),
-        true,
-        &[open_app_dir, open_core_dir, open_logs_dir],
-    )
-    .unwrap();
+    // let lighteweight_mode = &CheckMenuItem::with_id(
+    //     app_handle,
+    //     "entry_lightweight_mode",
+    //     t("LightWeight Mode"),
+    //     true,
+    //     is_lightweight_mode,
+    //     hotkeys.get("entry_lightweight_mode").map(|s| s.as_str()),
+    // )
+    // .unwrap();
+    //
+    // let copy_env =
+    //     &MenuItem::with_id(app_handle, "copy_env", t("Copy Env"), true, None::<&str>).unwrap();
+    //
+    // let open_app_dir = &MenuItem::with_id(
+    //     app_handle,
+    //     "open_app_dir",
+    //     t("Conf Dir"),
+    //     true,
+    //     None::<&str>,
+    // )
+    // .unwrap();
+    //
+    // let open_core_dir = &MenuItem::with_id(
+    //     app_handle,
+    //     "open_core_dir",
+    //     t("Core Dir"),
+    //     true,
+    //     None::<&str>,
+    // )
+    // .unwrap();
+    //
+    // let open_logs_dir = &MenuItem::with_id(
+    //     app_handle,
+    //     "open_logs_dir",
+    //     t("Logs Dir"),
+    //     true,
+    //     None::<&str>,
+    // )
+    // .unwrap();
+    //
+    // let open_dir = &Submenu::with_id_and_items(
+    //     app_handle,
+    //     "open_dir",
+    //     t("Open Dir"),
+    //     true,
+    //     &[open_app_dir, open_core_dir, open_logs_dir],
+    // )
+    // .unwrap();
 
     let restart_clash = &MenuItem::with_id(
         app_handle,
@@ -707,21 +708,25 @@ fn create_tray_menu(
     )
     .unwrap();
 
-    let app_version = &MenuItem::with_id(
-        app_handle,
-        "app_version",
-        format!("{} {version}", t("Verge Version")),
-        true,
-        None::<&str>,
-    )
-    .unwrap();
+    // let app_version = &MenuItem::with_id(
+    //     app_handle,
+    //     "app_version",
+    //     format!("{} {version}", t("Verge Version")),
+    //     true,
+    //     None::<&str>,
+    // )
+    // .unwrap();
 
     let more = &Submenu::with_id_and_items(
         app_handle,
         "more",
         t("More"),
         true,
-        &[restart_clash, restart_app, app_version],
+        &[
+            restart_clash,
+            restart_app,
+            // app_version
+        ],
     )
     .unwrap();
 
@@ -730,22 +735,36 @@ fn create_tray_menu(
 
     let separator = &PredefinedMenuItem::separator(app_handle).unwrap();
 
+    let toggle_connection = &CheckMenuItem::with_id(
+        app_handle,
+        "toggle_connection",
+        match tun_mode_enabled || system_proxy_enabled {
+            true => t("Disconnect"),
+            false => t("Connect"),
+        },
+        true,
+        !(tun_mode_enabled || system_proxy_enabled),
+        None::<&str>,
+    )
+    .unwrap();
+
     let menu = tauri::menu::MenuBuilder::new(app_handle)
         .items(&[
             open_window,
             separator,
-            rule_mode,
-            global_mode,
-            direct_mode,
+            toggle_connection,
+            // rule_mode,
+            // global_mode,
+            // direct_mode,
             separator,
             profiles,
             separator,
-            system_proxy,
-            tun_mode,
-            separator,
-            lighteweight_mode,
-            copy_env,
-            open_dir,
+            // system_proxy,
+            // tun_mode,
+            // separator,
+            // lighteweight_mode,
+            // copy_env,
+            // open_dir,
             more,
             separator,
             quit,
@@ -789,16 +808,19 @@ fn on_menu_event(_: &AppHandle, event: MenuEvent) {
         "tun_mode" => {
             feat::toggle_tun_mode(None);
         }
+        "toggle_connection" => {
+            duck::toggle_connection();
+        }
         "copy_env" => feat::copy_clash_env(),
-        "open_app_dir" => {
-            let _ = cmd::open_app_dir();
-        }
-        "open_core_dir" => {
-            let _ = cmd::open_core_dir();
-        }
-        "open_logs_dir" => {
-            let _ = cmd::open_logs_dir();
-        }
+        // "open_app_dir" => {
+        //     let _ = cmd::open_app_dir();
+        // }
+        // "open_core_dir" => {
+        //     let _ = cmd::open_core_dir();
+        // }
+        // "open_logs_dir" => {
+        //     let _ = cmd::open_logs_dir();
+        // }
         "restart_clash" => feat::restart_clash_core(),
         "restart_app" => feat::restart_app(),
         "entry_lightweight_mode" => {

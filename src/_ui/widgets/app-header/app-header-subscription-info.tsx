@@ -4,17 +4,20 @@ import { intervalPromise } from "@ui/utils/interval-promise";
 import { updateProfile } from "@/services/cmds";
 import { showNotice } from "@/services/noticeService";
 import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { FORMAT } from "@ui/consts";
 import styles from "./app-header.module.scss";
 import { Icon } from "@ui/components/icon";
+import clsx from "clsx";
 
 export function AppHeaderSubscriptionInfo() {
   const { t } = useTranslation();
   const {
     current,
+    mutateProfiles,
   }: {
     current: IProfileItem | undefined;
+    mutateProfiles: () => void;
   } = useProfiles();
 
   const [isPending, setIsPending] = useState(false);
@@ -28,21 +31,31 @@ export function AppHeaderSubscriptionInfo() {
     try {
       await intervalPromise(updateProfile(current.uid, current.option), 2000);
       showNotice("success", t("Update subscription successfully"), 1000);
+      mutateProfiles();
     } finally {
       setIsPending(false);
     }
   }
+  const expirationDate = current?.extra?.expire
+    ? dayjs.unix(current.extra.expire)
+    : undefined;
 
   return (
     <div className={styles.appHeaderSubscription}>
       <div className={styles.appHeaderSubscriptionInner}>
         <div className={styles.appHeaderSubscriptionTitle}>{current?.name}</div>
         <div className={styles.appHeaderSubscriptionParams}>
-          <div>
+          <div className={styles.appHeaderSubscriptionExpire}>
             Истекает:{" "}
-            {current?.extra?.expire
-              ? dayjs.unix(current.extra.expire).format(FORMAT.DATETIME)
-              : "-"}
+            <span
+              className={clsx(
+                expirationDate &&
+                  dayjs().isAfter(expirationDate) &&
+                  styles.appHeaderSubscriptionExpireExpiried,
+              )}
+            >
+              {expirationDate ? expirationDate.format(FORMAT.DATETIME) : "-"}
+            </span>
           </div>
           {/*{isNumber(current?.extra?.total) && (*/}
           {/*  <div>*/}

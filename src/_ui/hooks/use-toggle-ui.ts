@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const LOCAL_STORAGE_UI_TOGGLE_KEY = "is-new-ui";
 
-export function useToggleUI() {
+export function useToggleUi() {
   const [isNewUI, setIsNewUI] = useState(() => {
     const storedValue = localStorage.getItem(LOCAL_STORAGE_UI_TOGGLE_KEY);
     if (!storedValue || !["true", "false"].includes(storedValue)) {

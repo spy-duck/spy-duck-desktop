@@ -1,8 +1,8 @@
 @use "sass:color";
 
 @font-face {
-  font-family: 'twemoji mozilla';
-  src: url('assets/fonts/Twemoji.Mozilla.ttf') format('truetype');
+  font-family: "twemoji mozilla";
+  src: url("assets/fonts/Twemoji.Mozilla.ttf") format("truetype");
 }
 
 @font-face {
@@ -73,7 +73,8 @@
 
 :global(.os-windows) {
   --font-family:
-    "SF Pro", "Roboto", "JetBrains Mono", sans-serif, "Apple Color Emoji", "twemoji mozilla";
+    "SF Pro", "Roboto", "JetBrains Mono", sans-serif, "Apple Color Emoji",
+    "twemoji mozilla";
 }
 
 * {

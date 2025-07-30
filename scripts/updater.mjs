@@ -11,7 +11,6 @@ const ALPHA_TAG_NAME = "updater-alpha";
 const ALPHA_UPDATE_JSON_FILE = "update.json";
 const ALPHA_UPDATE_JSON_PROXY = "update-proxy.json";
 
-
 /// generate update.json
 /// upload to update tag's release asset
 async function resolveUpdater() {

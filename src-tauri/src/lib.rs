@@ -315,6 +315,9 @@ pub fn run() {
             cmd::check_media_unlock,
             // light-weight model
             cmd::entry_lightweight_mode,
+            // Duck commands
+            cmd::get_connection_mode,
+            cmd::set_connection_mode,
         ]);
 
     #[cfg(debug_assertions)]

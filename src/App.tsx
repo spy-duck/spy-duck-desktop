@@ -1,11 +1,11 @@
 import { UILayout } from "@ui/layout";
 import Layout from "./pages/_layout";
 import { useNotificationPermission } from "./hooks/useNotificationPermission";
-import { useToggleUI } from "@ui/hooks/useToggleUI";
+import { useToggleUi } from "@ui/hooks/use-toggle-ui";
 
 function App() {
   useNotificationPermission();
-  const { isNewUI } = useToggleUI();
+  const { isNewUI } = useToggleUi();
 
   return isNewUI ? <UILayout /> : <Layout />;
 }
