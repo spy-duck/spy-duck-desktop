@@ -28,7 +28,7 @@ export const EVENT_CHANGE_CONNECTION_MODE =
 export const EVENT_CHANGE_PROXY = "duck:change_proxy" as const;
 
 export const SERVER_MESSAGE_SOURCES = [
-  "https://spy-duck.com/messages.json",
+  "https://spy-duck.com/message.json",
   "https://raw.githubusercontent.com/spy-duck/spy-duck-desktop/refs/heads/new-ui/message.json",
   "https://gitlab.com/spy-duck/version/-/raw/main/message.json",
 ];
