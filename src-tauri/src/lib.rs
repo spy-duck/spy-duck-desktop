@@ -318,6 +318,8 @@ pub fn run() {
             // Duck commands
             cmd::get_connection_mode,
             cmd::set_connection_mode,
+            cmd::toggle_connection,
+            cmd::set_current_proxy,
         ]);
 
     #[cfg(debug_assertions)]

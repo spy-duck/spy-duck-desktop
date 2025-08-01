@@ -1,16 +1,30 @@
-use crate::cmd::CmdResult;
 use crate::config::{Config, IVerge};
-use crate::core::handle;
+use crate::core::{handle, tray};
 use crate::feat;
-use crate::process::AsyncHandler;
+use crate::module::mihomo::MihomoManager;
 use crate::utils::help;
 use anyhow::Result;
 use reqwest_dav::re_exports::serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::fmt;
 use tauri::Emitter;
-use tauri_plugin_clipboard_manager::ClipboardExt;
+use urlencoding::encode;
 
 pub const DUCK_CONFIG: &str = "duck.yaml";
+
+/**
+** Events
+**/
+const EVENT_CHANGE_CONNECTION_STATE: &str = "duck:change_connection_state";
+const EVENT_CHANGE_CONNECTION_MODE: &str = "duck:change_connection_mode";
+const EVENT_CHANGE_PROXY: &str = "duck:change_proxy";
+
+fn send_event(event: &str, data: Option<serde_json::Value>) {
+    let app_handle = handle::Handle::global().app_handle().unwrap();
+    app_handle
+        .emit(event, data)
+        .unwrap_or_else(|e| log::error!(target: "app", "Failed to emit event: {e}"));
+}
 
 /**
 ** Connection mode
@@ -22,7 +36,7 @@ pub enum ConnectionMode {
     Combine,
 }
 impl ConnectionMode {
-    fn is(&self, mode: ConnectionMode) -> bool {
+    pub fn is(&self, mode: ConnectionMode) -> bool {
         self.to_string() == mode.to_string()
     }
 }
@@ -66,11 +80,6 @@ fn write_to_config(config: DuckConfig) -> Result<()> {
 }
 
 /**
-** Events
-**/
-const EVENT_CHANGE_CONNECTION_STATE: &str = "duck:change_connection_state";
-
-/**
 ** Methods
 **/
 pub fn get_connection_mode() -> Result<ConnectionMode> {
@@ -85,31 +94,41 @@ pub fn set_connection_mode(mode: String) -> Result<ConnectionMode> {
         "combine" => ConnectionMode::Combine,
         _ => ConnectionMode::System,
     };
+
     let mut duck_config = read_from_config()?;
     duck_config.connection_mode = mode.clone();
     write_to_config(duck_config)?;
+
+    send_event(EVENT_CHANGE_CONNECTION_MODE, None);
+
     Ok(mode)
 }
 
-pub fn toggle_connection() {
-    let app_handle = handle::Handle::global().app_handle().unwrap();
+pub fn is_connected() -> bool {
     let verge = Config::verge().latest_ref().clone();
-    let connection_mode = get_connection_mode().unwrap();
-
     let system_proxy = verge.enable_system_proxy.as_ref().unwrap_or(&false);
     let tun_mode = verge.enable_tun_mode.as_ref().unwrap_or(&false);
 
-    let is_connected = *system_proxy || *tun_mode;
+    *system_proxy || *tun_mode
+}
+
+pub fn toggle_connection() {
+    let connection_mode = get_connection_mode().unwrap();
+
+    let is_connected = is_connected();
 
     let is_combined = connection_mode.is(ConnectionMode::Combine);
 
     if !is_connected {
-        app_handle
-            .emit(EVENT_CHANGE_CONNECTION_STATE, "connecting")
-            .ok();
+        send_event(
+            EVENT_CHANGE_CONNECTION_STATE,
+            Some(json!({
+                "state": "connecting",
+            })),
+        );
     }
 
-    AsyncHandler::spawn(async move || {
+    tauri::async_runtime::spawn(async move {
         match feat::patch_verge(
             IVerge {
                 enable_tun_mode: Some(match is_connected {
@@ -128,17 +147,139 @@ pub fn toggle_connection() {
         {
             Ok(_) => {
                 handle::Handle::refresh_verge();
-                app_handle
-                    .emit(
-                        EVENT_CHANGE_CONNECTION_STATE,
-                        match is_connected {
-                            true => "disconnected",
-                            false => "connected",
-                        },
-                    )
-                    .ok();
+                send_event(
+                    EVENT_CHANGE_CONNECTION_STATE,
+                    Some(json!({
+                        "state": match is_connected {
+                                    true => "disconnected",
+                                    false => "connected",
+                                },
+                    })),
+                );
             }
             Err(err) => log::error!(target: "app", "{err}"),
         }
     });
+}
+
+pub fn disconnect() {
+    tauri::async_runtime::spawn(async move {
+        if feat::patch_verge(
+            IVerge {
+                enable_tun_mode: Some(false),
+                enable_system_proxy: Some(false),
+                ..Default::default()
+            },
+            false,
+        )
+        .await
+        .is_ok()
+        {
+            handle::Handle::refresh_verge();
+            send_event(
+                EVENT_CHANGE_CONNECTION_STATE,
+                Some(json!({
+                    "state":"disconnected",
+                })),
+            );
+        }
+    });
+}
+
+#[derive(Debug)]
+pub struct ProxySelector {
+    pub name: String,
+    pub current_proxy: String,
+    pub proxies: Vec<String>,
+}
+
+pub async fn get_proxies_selector() -> Option<ProxySelector> {
+    let manager = MihomoManager::global();
+    if let Err(err) = manager.is_mihomo_running().await {
+        log::error!(target: "app", "Mihomo is not running: {err}");
+        return None;
+    }
+
+    let value = manager.get_providers_proxies().await.expect("fetch failed");
+
+    if let Some(providers) = value.get("providers").and_then(|v| v.as_object()) {
+        if let Some(proxy_provider) = providers.get("PROXY").and_then(|v| v.as_object()) {
+            if let Some(proxies) = proxy_provider.get("proxies").and_then(|v| v.as_array()) {
+                for proxy in proxies {
+                    if let Some(proxy_type) = proxy.get("type").and_then(|v| v.as_str()) {
+                        if proxy_type == "Selector" {
+                            let name = proxy
+                                .get("name")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or_default()
+                                .to_string();
+
+                            let current_proxy = proxy
+                                .get("now")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or_default()
+                                .to_string();
+
+                            let proxies_list: Vec<String> = proxy
+                                .get("all") // Use "all" for the array of proxies
+                                .and_then(|v| v.as_array())
+                                .map(|arr| {
+                                    arr.iter()
+                                        .filter_map(|v| v.as_str())
+                                        .map(|s| s.to_string())
+                                        .collect()
+                                })
+                                .unwrap_or_default();
+                            return Some(ProxySelector {
+                                name,
+                                current_proxy,
+                                proxies: proxies_list,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+    log::error!(target: "app", "No selector found");
+    None
+}
+
+pub async fn set_current_proxy(group: String, proxy: String) -> Result<(), String> {
+    let manager = MihomoManager::global();
+    log::info!(target: "app", "Setting current proxy: [{}] {}", encode(group.as_str()).to_string(), &proxy);
+
+    match manager
+        .set_proxy(encode(group.as_str()).to_string(), proxy.clone())
+        .await
+    {
+        Ok(_) => {
+            log::info!(target: "app", "Proxy set successfully");
+            let _ = tray::Tray::global().update_menu();
+
+            send_event(
+                EVENT_CHANGE_PROXY,
+                Some(json!({
+                    "group": group,
+                    "proxy": proxy,
+                })),
+            );
+
+            if is_connected() {
+                match manager.close_all_connections().await {
+                    Ok(_) => {
+                        log::info!(target: "app", "Connections closed successfully");
+                    }
+                    Err(err) => {
+                        log::error!(target: "app", "Failed to close all connections: {err}");
+                    }
+                }
+            }
+            Ok(())
+        }
+        Err(err) => {
+            log::error!(target: "app", "Failed to close all connections: {err}");
+            Err(err)
+        }
+    }
 }

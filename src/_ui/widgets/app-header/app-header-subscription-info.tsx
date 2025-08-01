@@ -9,6 +9,7 @@ import { FORMAT } from "@ui/consts";
 import styles from "./app-header.module.scss";
 import { Icon } from "@ui/components/icon";
 import clsx from "clsx";
+import { forceUpdateProxiesCommand } from "@ui/commands/clash.commands";
 
 export function AppHeaderSubscriptionInfo() {
   const { t } = useTranslation();
@@ -32,6 +33,7 @@ export function AppHeaderSubscriptionInfo() {
       await intervalPromise(updateProfile(current.uid, current.option), 2000);
       showNotice("success", t("Update subscription successfully"), 1000);
       mutateProfiles();
+      await forceUpdateProxiesCommand();
     } finally {
       setIsPending(false);
     }

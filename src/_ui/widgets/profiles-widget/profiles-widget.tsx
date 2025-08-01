@@ -2,18 +2,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAppData } from "@/providers/app-data-provider";
 import { TProxyGroup } from "@ui/types/proxy";
 import { List } from "@ui/components/list";
-import { deleteConnection, updateProxy } from "@/services/api";
-import { useVerge } from "@/hooks/use-verge";
 import styles from "./profiles-widget.module.scss";
 import { Box } from "@/_ui/components/box";
 import { ProfilesWidgetItem } from "@ui/widgets/profiles-widget/profiles-widget-item";
 import { UIButton } from "@ui/components/button";
 import { Icon } from "@ui/components/icon";
 import {
+  EVENT_CHANGE_PROXY,
   STORAGE_IS_PROXIES_INIT,
   STORAGE_KEY_GROUP,
   STORAGE_KEY_PROXY,
 } from "@ui/consts";
+import { forceUpdateProxiesCommand } from "@ui/commands/clash.commands";
+import { setCurrentProxyCommand } from "@ui/commands/duck.commands";
+import { showNotice } from "@/services/noticeService";
+import { useBackandEventListener } from "@ui/hooks/use-backand-event-listener";
+import { TEventPayloadChangeProxy } from "@ui/types";
 
 export const ProfilesWidgetContext = React.createContext<{
   selectedProxyGroup: string | null;
@@ -26,20 +30,18 @@ export const ProfilesWidgetContext = React.createContext<{
 type ProfilesWidgetProps = {};
 
 export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
-  const { verge } = useVerge();
-  const { proxies, connections, refreshProxy } = useAppData();
+  const { proxies, refreshProxy } = useAppData();
 
   const [selectedProxyGroup, setSelectedProxyGroup] = useState(() => {
     return localStorage.getItem(STORAGE_KEY_GROUP);
   });
-  const [previousProxyGroup, setPreviousProxyGroup] = useState(() => {
-    return localStorage.getItem(STORAGE_KEY_GROUP);
-  });
-
   const [selectedProxy, setSelectedProxy] = useState(() => {
     return localStorage.getItem(STORAGE_KEY_PROXY);
   });
 
+  const [previousProxyGroup, setPreviousProxyGroup] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY_GROUP);
+  });
   const [previousProxy, setPreviousProxy] = useState(() => {
     return localStorage.getItem(STORAGE_KEY_PROXY);
   });
@@ -49,48 +51,30 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
       return localStorage.getItem(STORAGE_IS_PROXIES_INIT) === "true";
     },
   );
+  useBackandEventListener<TEventPayloadChangeProxy>(
+    EVENT_CHANGE_PROXY,
+    async (event) => {
+      console.log(`Proxy changed event: `, event.payload);
+      const { group, proxy } = event.payload;
+      localStorage.setItem(STORAGE_KEY_GROUP, group);
+      localStorage.setItem(STORAGE_KEY_PROXY, proxy);
+      setPreviousProxyGroup(selectedProxyGroup);
+      setPreviousProxy(selectedProxy);
+      setSelectedProxyGroup(group);
+      setSelectedProxy(proxy);
+    },
+    [],
+  );
 
   async function handlerClickProxy(groupName: string, proxyName: string) {
     setSelectedProxyGroup(groupName);
     setSelectedProxy(proxyName);
     try {
-      await updateProxy(groupName, proxyName);
-
-      await Promise.all(
-        connections.data
-          .filter((conn: any) => conn.chains.includes(previousProxyGroup))
-          .map((conn: any) => {
-            return deleteConnection(conn.id);
-          }),
-      );
-
-      if (verge?.auto_close_connection && previousProxyGroup) {
-        connections.data.forEach((conn: any) => {
-          if (conn.chains.includes(previousProxyGroup)) {
-            deleteConnection(conn.id);
-          }
-        });
-      }
-
-      localStorage.setItem(STORAGE_KEY_GROUP, groupName);
-      localStorage.setItem(STORAGE_KEY_PROXY, proxyName);
-      setPreviousProxyGroup(groupName);
-      setPreviousProxy(groupName);
-
-      setTimeout(async () => {
-        await refreshProxy();
-        window.dispatchEvent(new CustomEvent("changed-proxy"));
-      }, 500);
-    } catch (err) {
+      await setCurrentProxyCommand(groupName, proxyName);
+    } catch (err: any) {
       setSelectedProxyGroup(previousProxyGroup);
       setSelectedProxy(previousProxy);
-      if (previousProxyGroup) {
-        localStorage.setItem(STORAGE_KEY_GROUP, previousProxyGroup);
-      }
-      if (previousProxy) {
-        localStorage.setItem(STORAGE_KEY_PROXY, previousProxy);
-      }
-      console.error("Update agent failed", err);
+      showNotice("error", `Ошибка при переключении прокси: ${err.message}`);
     }
   }
 
@@ -108,11 +92,17 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
   }, [groups]);
 
   useEffect(() => {
-    // Fallback timeout on authorization
-    setTimeout(() => {
-      setIsProxiesInitialized(true);
-      localStorage.setItem(STORAGE_IS_PROXIES_INIT, "true");
-    }, 60000);
+    if (!isProxiesInitialized) {
+      setTimeout(async () => {
+        await forceUpdateProxiesCommand();
+      }, 5000);
+
+      // Fallback timeout on authorization
+      setTimeout(() => {
+        setIsProxiesInitialized(true);
+        localStorage.setItem(STORAGE_IS_PROXIES_INIT, "true");
+      }, 60000);
+    }
   }, []);
 
   return (

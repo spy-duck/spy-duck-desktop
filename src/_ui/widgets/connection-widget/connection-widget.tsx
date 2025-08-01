@@ -11,10 +11,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServiceControls } from "@ui/hooks/use-service-controls";
 import { useProxyState } from "@ui/hooks/use-proxy-state";
 import {
-  getConnectionMode,
-  setConnectionMode,
-  TConnectionMode,
+  getConnectionModeCommand,
+  setConnectionModeCommand,
+  toggleConnectionCommand,
 } from "@ui/commands/duck.commands";
+import { EVENT_CHANGE_CONNECTION_MODE } from "@ui/consts";
+import { TConnectionMode } from "@ui/types";
+import { useBackandEventListener } from "@ui/hooks/use-backand-event-listener";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
@@ -35,7 +38,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
 
   const { data: connectionMode, refetch: refetchConnectionMode } = useQuery({
     queryKey: ["connectionMode"],
-    queryFn: () => getConnectionMode(),
+    queryFn: () => getConnectionModeCommand(),
   });
 
   const { data: runningMode, refetch: refetchRunningMode } = useQuery({
@@ -77,6 +80,13 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     });
   }, []);
 
+  /**
+   * Update connection mode when connection mode changed using tray
+   */
+  useBackandEventListener(EVENT_CHANGE_CONNECTION_MODE, async () => {
+    await refetchConnectionMode();
+  }, []);
+
   async function toggleConnection(e: MouseEvent) {
     e.preventDefault();
     const isConnecting = !isEnabledSystemProxy && !isEnabledTunMode;
@@ -89,24 +99,11 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
       installService();
       return;
     }
-
-    if (isConnecting) {
-      await updateProxyState({
-        enable_system_proxy:
-          connectionMode === "combine" || connectionMode === "system",
-        enable_tun_mode:
-          connectionMode === "combine" || connectionMode === "tun",
-      });
-      return;
-    }
-    await updateProxyState({
-      enable_system_proxy: false,
-      enable_tun_mode: false,
-    });
+    await toggleConnectionCommand();
   }
 
-  async function toggleSystemProxyType(e: ChangeEvent<HTMLInputElement>) {
-    await setConnectionMode(e.target.value as TConnectionMode);
+  async function handlerChangeConnectionMode(e: ChangeEvent<HTMLInputElement>) {
+    await setConnectionModeCommand(e.target.value as TConnectionMode);
     await refetchConnectionMode();
     localStorage.setItem(LOCAL_STORAGE_TAB_KEY, e.target.value);
 
@@ -136,7 +133,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
       <button
         className={clsx(
           styles.connectionWidgetButton,
-          (isEnabledSystemProxy || isEnabledTunMode) &&
+          connectionState === "connected" &&
             styles.connectionWidgetButtonConnected,
         )}
         onClick={toggleConnection}
@@ -179,7 +176,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               type="radio"
               name="system_proxy_type"
               value="tun"
-              onChange={toggleSystemProxyType}
+              onChange={handlerChangeConnectionMode}
               checked={connectionMode === "tun"}
               disabled={isConnecting || isPendingInstallService}
             />
@@ -191,7 +188,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               type="radio"
               name="system_proxy_type"
               value="system"
-              onChange={toggleSystemProxyType}
+              onChange={handlerChangeConnectionMode}
               checked={connectionMode === "system"}
               disabled={isConnecting || isPendingInstallService}
             />
@@ -203,7 +200,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
               type="radio"
               name="system_proxy_type"
               value="combine"
-              onChange={toggleSystemProxyType}
+              onChange={handlerChangeConnectionMode}
               checked={connectionMode === "combine"}
               disabled={isConnecting || isPendingInstallService}
             />

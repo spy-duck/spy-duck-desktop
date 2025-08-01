@@ -178,10 +178,8 @@ export function useInitApp() {
   }, []);
 
   useEffect(() => {
-    if (language) {
-      dayjs.locale(language === "zh" ? "zh-cn" : language);
-      i18next.changeLanguage(language);
-    }
+    dayjs.locale(language === "zh" ? "zh-cn" : language || "ru");
+    i18next.changeLanguage(language || "ru");
   }, [language]);
 
   const { clash, mutateClash, patchClash } = useClash();

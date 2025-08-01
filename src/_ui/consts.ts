@@ -20,3 +20,8 @@ export const DEV_URLS = [
 
 export const EVENT_CHANGE_CONNECTION_STATE =
   "duck:change_connection_state" as const;
+
+export const EVENT_CHANGE_CONNECTION_MODE =
+  "duck:change_connection_mode" as const;
+
+export const EVENT_CHANGE_PROXY = "duck:change_proxy" as const;

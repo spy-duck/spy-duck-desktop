@@ -4,11 +4,12 @@ import { getIpInfo } from "@/services/api";
 import { Box } from "@/_ui/components/box";
 import { Icon } from "@/_ui/components/icon";
 import { useConnectionState } from "@ui/state/connection";
-import { useMutation, keepPreviousData } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { intervalPromise } from "@ui/utils/interval-promise";
 import * as Flags from "country-flag-icons/react/1x1";
-
-const IP_REFRESH_SECONDS = 300;
+import { useBackandEventListener } from "@ui/hooks/use-backand-event-listener";
+import { TEventPayloadChangeProxy } from "@ui/types";
+import { EVENT_CHANGE_PROXY } from "@ui/consts";
 
 type IpInfo = Awaited<ReturnType<typeof getIpInfo>>;
 
@@ -33,18 +34,9 @@ export function IpInfoWidget({}: IpInfoWidgetProps): React.ReactElement {
     retryDelay: 1000,
   });
 
-  useEffect(() => {
-    mutate();
-
-    function changeProxyListener() {
-      setTimeout(() => mutate(), 1000);
-    }
-
-    window.addEventListener("changed-proxy", changeProxyListener);
-    return () => {
-      window.removeEventListener("changed-proxy", changeProxyListener);
-    };
-  }, [mutate]);
+  useBackandEventListener<TEventPayloadChangeProxy>(EVENT_CHANGE_PROXY, async () => {
+    setTimeout(() => mutate(), 1000);
+  }, []);
 
   useEffect(() => {
     if (["connected", "disconnected"].includes(connectionState)) {

@@ -3,17 +3,14 @@ use tauri::tray::TrayIconBuilder;
 #[cfg(target_os = "macos")]
 pub mod speed_rate;
 use crate::{
-    // cmd,
+    cmd,
     config::Config,
-    feat,
-    logging,
+    feat, logging,
     module::{lightweight::is_in_lightweight_mode, mihomo::Rate},
     utils::{dirs::find_target_icons, i18n::t, resolve::VERSION},
     Type,
 };
 
-use super::handle;
-use crate::module::duck;
 use anyhow::Result;
 use parking_lot::Mutex;
 use std::{
@@ -21,6 +18,9 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
     time::{Duration, Instant},
 };
+// use delay_timer::cron_clock::TimeUnitSpec;
+use super::handle;
+use crate::module::duck;
 use tauri::{
     menu::{CheckMenuItem, IsMenuItem, MenuEvent, MenuItem, PredefinedMenuItem, Submenu},
     tray::{MouseButton, MouseButtonState, TrayIconEvent},
@@ -47,7 +47,7 @@ fn should_handle_tray_click() -> bool {
         *last_click = now;
         true
     } else {
-        log::debug!(target: "app", "托盘点击被防抖机制忽略，距离上次点击 {:?}ms", 
+        log::debug!(target: "app", "托盘点击被防抖机制忽略，距离上次点击 {:?}ms",
                   now.duration_since(*last_click).as_millis());
         false
     }
@@ -272,7 +272,7 @@ impl Tray {
 
         match app_handle.tray_by_id("main") {
             Some(tray) => {
-                let _ = tray.set_menu(Some(create_tray_menu(
+                let _ = tray.set_menu(Some(create_tray_menu_duck(
                     app_handle,
                     Some(mode.as_str()),
                     *system_proxy,
@@ -504,7 +504,7 @@ impl Tray {
                 }
             }
         });
-        tray.on_menu_event(on_menu_event);
+        tray.on_menu_event(on_menu_event_duck);
         log::info!(target: "app", "系统托盘创建成功");
         Ok(())
     }
@@ -521,6 +521,7 @@ impl Tray {
     }
 }
 
+#[allow(unused)]
 fn create_tray_menu(
     app_handle: &AppHandle,
     mode: Option<&str>,
@@ -529,10 +530,10 @@ fn create_tray_menu(
     profile_uid_and_name: Vec<(String, String)>,
     is_lightweight_mode: bool,
 ) -> Result<tauri::menu::Menu<Wry>> {
-    // let mode = mode.unwrap_or("");
+    let mode = mode.unwrap_or("");
 
-    // let unknown_version = String::from("unknown");
-    // let version = VERSION.get().unwrap_or(&unknown_version);
+    let unknown_version = String::from("unknown");
+    let version = VERSION.get().unwrap_or(&unknown_version);
 
     let hotkeys = Config::verge()
         .latest_ref()
@@ -582,35 +583,35 @@ fn create_tray_menu(
     )
     .unwrap();
 
-    // let rule_mode = &CheckMenuItem::with_id(
-    //     app_handle,
-    //     "rule_mode",
-    //     t("Rule Mode"),
-    //     true,
-    //     mode == "rule",
-    //     hotkeys.get("clash_mode_rule").map(|s| s.as_str()),
-    // )
-    // .unwrap();
-    //
-    // let global_mode = &CheckMenuItem::with_id(
-    //     app_handle,
-    //     "global_mode",
-    //     t("Global Mode"),
-    //     true,
-    //     mode == "global",
-    //     hotkeys.get("clash_mode_global").map(|s| s.as_str()),
-    // )
-    // .unwrap();
-    //
-    // let direct_mode = &CheckMenuItem::with_id(
-    //     app_handle,
-    //     "direct_mode",
-    //     t("Direct Mode"),
-    //     true,
-    //     mode == "direct",
-    //     hotkeys.get("clash_mode_direct").map(|s| s.as_str()),
-    // )
-    // .unwrap();
+    let rule_mode = &CheckMenuItem::with_id(
+        app_handle,
+        "rule_mode",
+        t("Rule Mode"),
+        true,
+        mode == "rule",
+        hotkeys.get("clash_mode_rule").map(|s| s.as_str()),
+    )
+    .unwrap();
+
+    let global_mode = &CheckMenuItem::with_id(
+        app_handle,
+        "global_mode",
+        t("Global Mode"),
+        true,
+        mode == "global",
+        hotkeys.get("clash_mode_global").map(|s| s.as_str()),
+    )
+    .unwrap();
+
+    let direct_mode = &CheckMenuItem::with_id(
+        app_handle,
+        "direct_mode",
+        t("Direct Mode"),
+        true,
+        mode == "direct",
+        hotkeys.get("clash_mode_direct").map(|s| s.as_str()),
+    )
+    .unwrap();
 
     let profiles = &Submenu::with_id_and_items(
         app_handle,
@@ -641,54 +642,54 @@ fn create_tray_menu(
     )
     .unwrap();
 
-    // let lighteweight_mode = &CheckMenuItem::with_id(
-    //     app_handle,
-    //     "entry_lightweight_mode",
-    //     t("LightWeight Mode"),
-    //     true,
-    //     is_lightweight_mode,
-    //     hotkeys.get("entry_lightweight_mode").map(|s| s.as_str()),
-    // )
-    // .unwrap();
-    //
-    // let copy_env =
-    //     &MenuItem::with_id(app_handle, "copy_env", t("Copy Env"), true, None::<&str>).unwrap();
-    //
-    // let open_app_dir = &MenuItem::with_id(
-    //     app_handle,
-    //     "open_app_dir",
-    //     t("Conf Dir"),
-    //     true,
-    //     None::<&str>,
-    // )
-    // .unwrap();
-    //
-    // let open_core_dir = &MenuItem::with_id(
-    //     app_handle,
-    //     "open_core_dir",
-    //     t("Core Dir"),
-    //     true,
-    //     None::<&str>,
-    // )
-    // .unwrap();
-    //
-    // let open_logs_dir = &MenuItem::with_id(
-    //     app_handle,
-    //     "open_logs_dir",
-    //     t("Logs Dir"),
-    //     true,
-    //     None::<&str>,
-    // )
-    // .unwrap();
-    //
-    // let open_dir = &Submenu::with_id_and_items(
-    //     app_handle,
-    //     "open_dir",
-    //     t("Open Dir"),
-    //     true,
-    //     &[open_app_dir, open_core_dir, open_logs_dir],
-    // )
-    // .unwrap();
+    let lighteweight_mode = &CheckMenuItem::with_id(
+        app_handle,
+        "entry_lightweight_mode",
+        t("LightWeight Mode"),
+        true,
+        is_lightweight_mode,
+        hotkeys.get("entry_lightweight_mode").map(|s| s.as_str()),
+    )
+    .unwrap();
+
+    let copy_env =
+        &MenuItem::with_id(app_handle, "copy_env", t("Copy Env"), true, None::<&str>).unwrap();
+
+    let open_app_dir = &MenuItem::with_id(
+        app_handle,
+        "open_app_dir",
+        t("Conf Dir"),
+        true,
+        None::<&str>,
+    )
+    .unwrap();
+
+    let open_core_dir = &MenuItem::with_id(
+        app_handle,
+        "open_core_dir",
+        t("Core Dir"),
+        true,
+        None::<&str>,
+    )
+    .unwrap();
+
+    let open_logs_dir = &MenuItem::with_id(
+        app_handle,
+        "open_logs_dir",
+        t("Logs Dir"),
+        true,
+        None::<&str>,
+    )
+    .unwrap();
+
+    let open_dir = &Submenu::with_id_and_items(
+        app_handle,
+        "open_dir",
+        t("Open Dir"),
+        true,
+        &[open_app_dir, open_core_dir, open_logs_dir],
+    )
+    .unwrap();
 
     let restart_clash = &MenuItem::with_id(
         app_handle,
@@ -708,25 +709,21 @@ fn create_tray_menu(
     )
     .unwrap();
 
-    // let app_version = &MenuItem::with_id(
-    //     app_handle,
-    //     "app_version",
-    //     format!("{} {version}", t("Verge Version")),
-    //     true,
-    //     None::<&str>,
-    // )
-    // .unwrap();
+    let app_version = &MenuItem::with_id(
+        app_handle,
+        "app_version",
+        format!("{} {version}", t("Verge Version")),
+        true,
+        None::<&str>,
+    )
+    .unwrap();
 
     let more = &Submenu::with_id_and_items(
         app_handle,
         "more",
         t("More"),
         true,
-        &[
-            restart_clash,
-            restart_app,
-            // app_version
-        ],
+        &[restart_clash, restart_app, app_version],
     )
     .unwrap();
 
@@ -735,36 +732,22 @@ fn create_tray_menu(
 
     let separator = &PredefinedMenuItem::separator(app_handle).unwrap();
 
-    let toggle_connection = &CheckMenuItem::with_id(
-        app_handle,
-        "toggle_connection",
-        match tun_mode_enabled || system_proxy_enabled {
-            true => t("Disconnect"),
-            false => t("Connect"),
-        },
-        true,
-        !(tun_mode_enabled || system_proxy_enabled),
-        None::<&str>,
-    )
-    .unwrap();
-
     let menu = tauri::menu::MenuBuilder::new(app_handle)
         .items(&[
             open_window,
             separator,
-            toggle_connection,
-            // rule_mode,
-            // global_mode,
-            // direct_mode,
+            rule_mode,
+            global_mode,
+            direct_mode,
             separator,
             profiles,
             separator,
-            // system_proxy,
-            // tun_mode,
-            // separator,
-            // lighteweight_mode,
-            // copy_env,
-            // open_dir,
+            system_proxy,
+            tun_mode,
+            separator,
+            lighteweight_mode,
+            copy_env,
+            open_dir,
             more,
             separator,
             quit,
@@ -774,6 +757,7 @@ fn create_tray_menu(
     Ok(menu)
 }
 
+#[allow(unused)]
 fn on_menu_event(_: &AppHandle, event: MenuEvent) {
     match event.id.as_ref() {
         mode @ ("rule_mode" | "global_mode" | "direct_mode") => {
@@ -808,19 +792,16 @@ fn on_menu_event(_: &AppHandle, event: MenuEvent) {
         "tun_mode" => {
             feat::toggle_tun_mode(None);
         }
-        "toggle_connection" => {
-            duck::toggle_connection();
-        }
         "copy_env" => feat::copy_clash_env(),
-        // "open_app_dir" => {
-        //     let _ = cmd::open_app_dir();
-        // }
-        // "open_core_dir" => {
-        //     let _ = cmd::open_core_dir();
-        // }
-        // "open_logs_dir" => {
-        //     let _ = cmd::open_logs_dir();
-        // }
+        "open_app_dir" => {
+            let _ = cmd::open_app_dir();
+        }
+        "open_core_dir" => {
+            let _ = cmd::open_core_dir();
+        }
+        "open_logs_dir" => {
+            let _ = cmd::open_logs_dir();
+        }
         "restart_clash" => feat::restart_clash_core(),
         "restart_app" => feat::restart_app(),
         "entry_lightweight_mode" => {
@@ -847,6 +828,211 @@ fn on_menu_event(_: &AppHandle, event: MenuEvent) {
         id if id.starts_with("profiles_") => {
             let profile_index = &id["profiles_".len()..];
             feat::toggle_proxy_profile(profile_index.into());
+        }
+        _ => {}
+    }
+
+    if let Err(e) = Tray::global().update_all_states() {
+        log::warn!(target: "app", "更新托盘状态失败: {e}");
+    }
+}
+
+fn create_tray_menu_duck(
+    app_handle: &AppHandle,
+    #[allow(unused)] mode: Option<&str>,
+    system_proxy_enabled: bool,
+    tun_mode_enabled: bool,
+    #[allow(unused)] profile_uid_and_name: Vec<(String, String)>,
+    #[allow(unused)] is_lightweight_mode: bool,
+) -> Result<tauri::menu::Menu<Wry>> {
+    let hotkeys = Config::verge()
+        .latest_ref()
+        .hotkeys
+        .as_ref()
+        .map(|h| {
+            h.iter()
+                .filter_map(|item| {
+                    let mut parts = item.split(',');
+                    match (parts.next(), parts.next()) {
+                        (Some(func), Some(key)) => Some((func.to_string(), key.to_string())),
+                        _ => None,
+                    }
+                })
+                .collect::<std::collections::HashMap<String, String>>()
+        })
+        .unwrap_or_default();
+
+    let open_window = &MenuItem::with_id(
+        app_handle,
+        "open_window",
+        t("Dashboard"),
+        true,
+        hotkeys.get("open_or_close_dashboard").map(|s| s.as_str()),
+    )?;
+
+    let connection_mode = duck::get_connection_mode()?;
+    let connection_modes = &Submenu::with_id_and_items(
+        app_handle,
+        "profiles",
+        t("Режим подключения"),
+        true,
+        &[
+            &CheckMenuItem::with_id(
+                app_handle,
+                "connection_mode_tun",
+                t("VPN сервис"),
+                true,
+                connection_mode.is(duck::ConnectionMode::Tun),
+                None::<&str>,
+            )?,
+            &CheckMenuItem::with_id(
+                app_handle,
+                "connection_mode_system",
+                t("Прокси"),
+                true,
+                connection_mode.is(duck::ConnectionMode::System),
+                None::<&str>,
+            )?,
+            &CheckMenuItem::with_id(
+                app_handle,
+                "connection_mode_combine",
+                t("Совместный"),
+                true,
+                connection_mode.is(duck::ConnectionMode::Combine),
+                None::<&str>,
+            )?,
+        ],
+    )?;
+
+    let quit = &MenuItem::with_id(app_handle, "quit", t("Exit"), true, Some("CmdOrControl+Q"))?;
+
+    let separator = &PredefinedMenuItem::separator(app_handle)?;
+
+    let toggle_connection = &MenuItem::with_id(
+        app_handle,
+        "toggle_connection",
+        match tun_mode_enabled || system_proxy_enabled {
+            true => t("Отключить"),
+            false => t("Подключить"),
+        },
+        true,
+        None::<&str>,
+    )?;
+
+    let selector_result =
+        std::thread::spawn(|| tauri::async_runtime::block_on(duck::get_proxies_selector()))
+            .join()
+            .unwrap();
+
+    let proxies_menu_items: Vec<CheckMenuItem<Wry>> = if let Some(s) = selector_result {
+        let name = s.name;
+
+        s.proxies
+            .iter()
+            .map(|proxy| {
+                CheckMenuItem::with_id(
+                    app_handle,
+                    format!("proxy_select_{name}_{proxy}"),
+                    &proxy,
+                    true,
+                    proxy.to_string() == s.current_proxy,
+                    None::<&str>,
+                )
+                .unwrap()
+            })
+            .collect()
+    } else {
+        vec![]
+    };
+
+    let proxies_menu_items: Vec<&dyn IsMenuItem<Wry>> = proxies_menu_items
+        .iter()
+        .map(|item| item as &dyn IsMenuItem<Wry>)
+        .collect();
+
+    let proxies_item = &Submenu::with_id_and_items(
+        app_handle,
+        "profiles",
+        t("Profiles"),
+        true,
+        &proxies_menu_items,
+    )?;
+
+    let menu = tauri::menu::MenuBuilder::new(app_handle)
+        .items(&[
+            open_window,
+            separator,
+            toggle_connection,
+            separator,
+            proxies_item,
+            connection_modes,
+            separator,
+            quit,
+        ])
+        .build()?;
+    Ok(menu)
+}
+
+fn on_menu_event_duck(_: &AppHandle, event: MenuEvent) {
+    match event.id.as_ref() {
+        "open_window" => {
+            use crate::utils::window_manager::WindowManager;
+            log::info!(target: "app", "Tray menu click: Open window");
+
+            if !should_handle_tray_click() {
+                return;
+            }
+
+            let result = WindowManager::show_main_window();
+            log::info!(target: "app", "The window displays the results: {result:?}");
+        }
+        "toggle_connection" => {
+            log::info!(target: "app", "Toggle connection");
+            duck::toggle_connection();
+        }
+        "connection_mode_tun" => {
+            log::info!(target: "app", "Set connection mode to: tun");
+            duck::set_connection_mode(String::from("tun")).unwrap();
+            if duck::is_connected() {
+                duck::disconnect();
+                duck::toggle_connection();
+            }
+        }
+        "connection_mode_system" => {
+            log::info!(target: "app", "Set connection mode to: system");
+            duck::set_connection_mode(String::from("system")).unwrap();
+            if duck::is_connected() {
+                duck::disconnect();
+                duck::toggle_connection();
+            }
+        }
+        "connection_mode_combine" => {
+            log::info!(target: "app", "Set connection mode to: combine");
+            duck::set_connection_mode(String::from("combine")).unwrap();
+            if duck::is_connected() {
+                duck::disconnect();
+                duck::toggle_connection();
+            }
+        }
+        "copy_env" => feat::copy_clash_env(),
+        "restart_clash" => feat::restart_clash_core(),
+        "restart_app" => feat::restart_app(),
+        "quit" => {
+            feat::quit();
+        }
+        id if id.starts_with("profiles_") => {
+            let profile_index = &id["profiles_".len()..];
+            feat::toggle_proxy_profile(profile_index.into());
+        }
+        id if id.starts_with("proxy_select_") => {
+            let proxy = &id["proxy_select_".len()..];
+            if let Some((group, proxy)) = proxy.split_once('_') {
+                println!("proxy_select_{}_{}", &group, &proxy);
+                tauri::async_runtime::spawn(duck::set_current_proxy(
+                    group.to_string(),
+                    proxy.to_string(),
+                ));
+            }
         }
         _ => {}
     }

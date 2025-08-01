@@ -30,6 +30,7 @@ impl MihomoManager {
         let client_response = self
             .client
             .request(method.clone(), &url)
+            .timeout(Duration::from_secs(5))
             .json(&data.unwrap_or(json!({})))
             .send()
             .await
@@ -71,6 +72,7 @@ impl MihomoManager {
     pub async fn close_all_connections(&self) -> Result<(), String> {
         let url = format!("{}/connections", self.mihomo_server);
         let response = self.send_request(Method::DELETE, url, None).await?;
+        dbg!(&response["code"]);
         if response["code"] == 204 {
             Ok(())
         } else {
@@ -143,5 +145,22 @@ impl MihomoManager {
                 .unwrap_or("unknown error")
                 .to_string())
         }
+    }
+}
+
+impl MihomoManager {
+    pub async fn set_proxy(&self, name: String, proxy: String) -> Result<(), String> {
+        let url = format!("{}/proxies/{}", self.mihomo_server, name);
+        let response = self
+            .send_request(
+                Method::PUT,
+                url,
+                Some(json!({
+                    "name": proxy,
+                })),
+            )
+            .await?;
+        dbg!(&response["code"]);
+        Ok(())
     }
 }
