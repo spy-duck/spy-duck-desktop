@@ -33,6 +33,7 @@ export function IpInfoWidget({}: IpInfoWidgetProps): React.ReactElement {
     retry: 3,
     retryDelay: 1000,
   });
+  useEffect(() => mutate(), []);
 
   useBackandEventListener<TEventPayloadChangeProxy>(EVENT_CHANGE_PROXY, async () => {
     setTimeout(() => mutate(), 1000);
@@ -60,6 +61,12 @@ export function IpInfoWidget({}: IpInfoWidgetProps): React.ReactElement {
           <div className={styles.ipInfoWidgetRows}>
             <div>{ipInfo?.ip || "-"}</div>
             <small>{ipInfo?.country || "-"}</small>
+          </div>
+        )}
+        {!ipInfo?.ip && (
+          <div className={styles.ipInfoWidgetRows}>
+            <div>Ваш IP адрес</div>
+            <small>Локация</small>
           </div>
         )}
         <div>

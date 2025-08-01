@@ -1,0 +1,32 @@
+.server-message-widget {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.75em 1.25em !important;
+
+  & > button {
+    position: absolute;
+    top: 0.5em;
+    right: 0.75em;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 0.25em;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: var(--grey-200);
+    }
+  }
+
+  p {
+    padding: 0;
+    margin: 0.25em 0 0;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+    pointer-events: all !important;
+    white-space: pre-line;
+  }
+}

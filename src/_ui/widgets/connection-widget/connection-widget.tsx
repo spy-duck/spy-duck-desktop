@@ -18,6 +18,8 @@ import {
 import { EVENT_CHANGE_CONNECTION_MODE } from "@ui/consts";
 import { TConnectionMode } from "@ui/types";
 import { useBackandEventListener } from "@ui/hooks/use-backand-event-listener";
+import { ServerMessageWidget } from "@ui/widgets/server-message-widget";
+import { IpInfoWidget } from "@ui/widgets/ip-info-widget";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
@@ -127,6 +129,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
 
   return (
     <div className={styles.connectionWidget}>
+      <ServerMessageWidget />
       <button
         className={clsx(
           styles.connectionWidgetButton,
@@ -204,6 +207,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
           </label>
         </div>
       </div>
+      <IpInfoWidget />
     </div>
   );
 }

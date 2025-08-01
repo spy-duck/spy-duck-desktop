@@ -24,6 +24,7 @@ export function UIHomeScreen() {
         >
           <ProfilesWidget />
         </div>
+        <ConnectionWidget />
         <div
           style={{
             display: "flex",
@@ -33,12 +34,7 @@ export function UIHomeScreen() {
             justifyContent: "center",
             padding: "0 24px",
           }}
-        >
-          <ConnectionWidget />
-          <div>
-            <IpInfoWidget />
-          </div>
-        </div>
+        ></div>
       </div>
     </>
   );
