@@ -9,7 +9,7 @@ import { mutate } from "swr";
 import { useSystemState } from "@/hooks/use-system-state";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { useLogout } from "@ui/hooks/use-logout";
-import { exitApp } from "@/services/cmds";
+import { exitApp, uninstallService } from "@/services/cmds";
 import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { DialogRef } from "@/components/base";
 import { UpdateViewer } from "@/components/setting/mods/update-viewer";
@@ -97,6 +97,25 @@ export function SettingsModalWidget({
     }
   }
 
+  async function handlerClickUninstallService(
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) {
+    e.preventDefault();
+    if (
+      await confirm("Удаление системной службы", {
+        title: "Подтвердите удаление",
+        kind: "warning",
+      })
+    ) {
+      try {
+        await uninstallService();
+        showNotice("success", t("Service Uninstalled Successfully"));
+      } catch (err: any) {
+        showNotice("error", err?.response.data.message || err.toString());
+      }
+    }
+  }
+
   return (
     <Modal {...modalProps} size="small" showCloseButton>
       <Modal.Header>Настройки</Modal.Header>
@@ -132,6 +151,9 @@ export function SettingsModalWidget({
           <ListItem onClick={handlerClickUpdateGeo}>Обновить GeoData</ListItem>
           <ListItem onClick={handlerClickCheckUpdates}>
             Проверить обновление
+          </ListItem>
+          <ListItem onClick={handlerClickUninstallService}>
+            Удалить системную службу
           </ListItem>
           <ListItem onClick={handlerClickLogout}>Удалить подписку</ListItem>
           <ListItem onClick={handlerClickExit}>Остановить приложение</ListItem>

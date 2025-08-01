@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAppData } from "@/providers/app-data-provider";
 import { TProxyGroup } from "@ui/types/proxy";
 import { List } from "@ui/components/list";
@@ -31,6 +31,7 @@ type ProfilesWidgetProps = {};
 
 export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
   const { proxies, refreshProxy } = useAppData();
+  const changeByClick = useRef(false);
 
   const [selectedProxyGroup, setSelectedProxyGroup] = useState(() => {
     return localStorage.getItem(STORAGE_KEY_GROUP);
@@ -51,6 +52,7 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
       return localStorage.getItem(STORAGE_IS_PROXIES_INIT) === "true";
     },
   );
+
   useBackandEventListener<TEventPayloadChangeProxy>(
     EVENT_CHANGE_PROXY,
     async (event) => {
@@ -62,16 +64,30 @@ export function ProfilesWidget({}: ProfilesWidgetProps): React.ReactElement {
       setPreviousProxy(selectedProxy);
       setSelectedProxyGroup(group);
       setSelectedProxy(proxy);
+
+      setTimeout(() => {
+        console.log(changeByClick.current);
+        if (!changeByClick.current) {
+          document.querySelector(".current-proxy")?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "center",
+          });
+        }
+        changeByClick.current = false;
+      }, 500);
     },
     [],
   );
 
   async function handlerClickProxy(groupName: string, proxyName: string) {
+    changeByClick.current = true;
     setSelectedProxyGroup(groupName);
     setSelectedProxy(proxyName);
     try {
       await setCurrentProxyCommand(groupName, proxyName);
     } catch (err: any) {
+      changeByClick.current = false;
       setSelectedProxyGroup(previousProxyGroup);
       setSelectedProxy(previousProxy);
       showNotice("error", `Ошибка при переключении прокси: ${err.message}`);

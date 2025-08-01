@@ -1,5 +1,5 @@
 use crate::config::{Config, IVerge};
-use crate::core::{handle, tray};
+use crate::core::{handle, service, tray};
 use crate::feat;
 use crate::module::mihomo::MihomoManager;
 use crate::utils::help;
@@ -112,7 +112,7 @@ pub fn is_connected() -> bool {
     *system_proxy || *tun_mode
 }
 
-pub fn toggle_connection() {
+pub fn toggle_connection() -> Result<()> {
     let connection_mode = get_connection_mode().unwrap();
 
     let is_connected = is_connected();
@@ -122,13 +122,20 @@ pub fn toggle_connection() {
     if !is_connected {
         send_event(
             EVENT_CHANGE_CONNECTION_STATE,
-            Some(json!({
-                "state": "connecting",
-            })),
+            Some(json!({"state": "connecting"})),
         );
     }
 
     tauri::async_runtime::spawn(async move {
+        if connection_mode.is(ConnectionMode::Tun) || connection_mode.is(ConnectionMode::Combine) {
+            if let Err(e) = service::is_service_available().await {
+                log::info!(target: "app", "Service is not available");
+                if let Err(e) = service::install_service().await {
+                    return Err("Failed to install service");
+                };
+            }
+        }
+
         match feat::patch_verge(
             IVerge {
                 enable_tun_mode: Some(match is_connected {
@@ -151,18 +158,27 @@ pub fn toggle_connection() {
                     EVENT_CHANGE_CONNECTION_STATE,
                     Some(json!({
                         "state": match is_connected {
-                                    true => "disconnected",
-                                    false => "connected",
-                                },
+                            true => "disconnected",
+                            false => "connected",
+                        },
                     })),
                 );
+                Ok(())
             }
-            Err(err) => log::error!(target: "app", "{err}"),
+            Err(err) => {
+                log::error!(target: "app", "{err}");
+                Err("Failed to update verge")
+            }
         }
     });
+    Ok(())
 }
 
 pub fn disconnect() {
+    send_event(
+        EVENT_CHANGE_CONNECTION_STATE,
+        Some(json!({"state": "connecting"})),
+    );
     tauri::async_runtime::spawn(async move {
         if feat::patch_verge(
             IVerge {

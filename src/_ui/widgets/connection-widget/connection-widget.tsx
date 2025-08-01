@@ -54,10 +54,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
         if (success) {
           console.log("Service installed and restarted successfully");
           await refetchRunningMode();
-          await updateProxyState({
-            enable_system_proxy: false,
-            enable_tun_mode: true,
-          });
+          await toggleConnectionCommand();
         }
       },
     });
@@ -152,7 +149,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
             <Icon name="gear" rotate />
           </div>
           <div>
-            Устанавливается и настраивается системный сервис. <br />
+            Устанавливается и настраивается системная&nbsp;служба. <br />
             Это может занять некоторое время.
           </div>
         </div>

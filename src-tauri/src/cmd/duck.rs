@@ -11,7 +11,7 @@ pub fn get_connection_mode() -> CmdResult<String> {
 
 #[tauri::command]
 pub fn toggle_connection() -> CmdResult<()> {
-    duck::toggle_connection();
+    duck::toggle_connection().unwrap();
     Ok(())
 }
 

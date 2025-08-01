@@ -988,14 +988,14 @@ fn on_menu_event_duck(_: &AppHandle, event: MenuEvent) {
         }
         "toggle_connection" => {
             log::info!(target: "app", "Toggle connection");
-            duck::toggle_connection();
+            duck::toggle_connection().unwrap();
         }
         "connection_mode_tun" => {
             log::info!(target: "app", "Set connection mode to: tun");
             duck::set_connection_mode(String::from("tun")).unwrap();
             if duck::is_connected() {
                 duck::disconnect();
-                duck::toggle_connection();
+                duck::toggle_connection().unwrap();
             }
         }
         "connection_mode_system" => {
@@ -1003,7 +1003,7 @@ fn on_menu_event_duck(_: &AppHandle, event: MenuEvent) {
             duck::set_connection_mode(String::from("system")).unwrap();
             if duck::is_connected() {
                 duck::disconnect();
-                duck::toggle_connection();
+                duck::toggle_connection().unwrap();
             }
         }
         "connection_mode_combine" => {
@@ -1011,7 +1011,7 @@ fn on_menu_event_duck(_: &AppHandle, event: MenuEvent) {
             duck::set_connection_mode(String::from("combine")).unwrap();
             if duck::is_connected() {
                 duck::disconnect();
-                duck::toggle_connection();
+                duck::toggle_connection().unwrap();
             }
         }
         "copy_env" => feat::copy_clash_env(),

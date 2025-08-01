@@ -5,6 +5,7 @@ import { ProfilesWidgetContext } from "@ui/widgets/profiles-widget/profiles-widg
 import React, { useContext } from "react";
 import styles from "./profiles-widget.module.scss";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 
 function convertDelayColor(delayValue: number) {
   const colorStr = delayManager.formatDelayColor(delayValue);
@@ -64,6 +65,7 @@ export function ProfilesWidgetItem({
       key={group.name + proxy.id}
       current={isCurrent}
       onClick={handlerClickProxy}
+      className={clsx(isCurrent && "current-proxy")}
     >
       <div className={styles.profilesWidgetProxy}>
         <div className={styles.profilesWidgetProxyName}>{proxy.name}</div>
