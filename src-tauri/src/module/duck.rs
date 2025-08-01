@@ -113,7 +113,7 @@ pub fn is_connected() -> bool {
 }
 
 pub fn toggle_connection() -> Result<()> {
-    let connection_mode = get_connection_mode().unwrap();
+    let connection_mode = get_connection_mode()?;
 
     let is_connected = is_connected();
 
@@ -128,11 +128,14 @@ pub fn toggle_connection() -> Result<()> {
 
     tauri::async_runtime::spawn(async move {
         if connection_mode.is(ConnectionMode::Tun) || connection_mode.is(ConnectionMode::Combine) {
-            if let Err(e) = service::is_service_available().await {
+            let available = service::is_service_available().await;
+            if available.is_err() {
                 log::info!(target: "app", "Service is not available");
+
                 if let Err(e) = service::install_service().await {
+                    log::error!(target: "app", "Failed to install service: {e}");
                     return Err("Failed to install service");
-                };
+                }
             }
         }
 
