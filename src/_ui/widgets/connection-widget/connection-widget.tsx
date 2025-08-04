@@ -1,16 +1,19 @@
 import React, { MouseEvent, ChangeEvent, useEffect } from "react";
-import { useSystemState } from "@/hooks/use-system-state";
-import styles from "./connection-widget.module.scss";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { Icon } from "@ui/components/icon";
-import { getRunningMode } from "@/services/cmds";
 import { mutate } from "swr";
+import { Icon } from "@ui/components/icon";
+import {
+  getRunningMode,
+  isServiceAvailable as isServiceAvailableCommand,
+} from "@/services/cmds";
 import { useConnectionState } from "@ui/state/connection";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServiceControls } from "@ui/hooks/use-service-controls";
 import { useProxyState } from "@ui/hooks/use-proxy-state";
+import styles from "./connection-widget.module.scss";
 import {
+  disconnectCommand,
   getConnectionModeCommand,
   setConnectionModeCommand,
   toggleConnectionCommand,
@@ -20,6 +23,7 @@ import { TConnectionMode } from "@ui/types";
 import { useBackandEventListener } from "@ui/hooks/use-backand-event-listener";
 import { ServerMessageWidget } from "@ui/widgets/server-message-widget";
 import { IpInfoWidget } from "@ui/widgets/ip-info-widget";
+import { intervalPromise } from "@ui/utils/interval-promise";
 
 const LOCAL_STORAGE_TAB_KEY = "clash-verge-proxy-active-tab";
 
@@ -27,7 +31,6 @@ type ConnectionButtonProps = {};
 
 export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement {
   const { t } = useTranslation();
-  const { isAdminMode, isServiceMode } = useSystemState();
   const { installService: installServiceAction } = useServiceControls();
   const {
     updateProxyState,
@@ -43,25 +46,33 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     queryFn: () => getConnectionModeCommand(),
   });
 
-  const { data: runningMode, refetch: refetchRunningMode } = useQuery({
-    queryKey: ["runningMode"],
-    queryFn: () => getRunningMode(),
-  });
+  const { data: isServiceAvailable, refetch: refetchIsServiceAvailable } =
+    useQuery({
+      queryKey: ["isServiceAvailable"],
+      queryFn: () => isServiceAvailableCommand(),
+    });
+
+  const { mutate: toggleConnection, isPending: isPendingToggleConnection } =
+    useMutation({
+      mutationKey: ["toggleConnection"],
+      /**
+       * TODO: create delay on backend
+       */
+      mutationFn: () => intervalPromise(toggleConnectionCommand(), 4000),
+    });
 
   const { mutate: installService, isPending: isPendingInstallService } =
     useMutation({
-      mutationKey: ["runningMode"],
+      mutationKey: ["installService"],
       mutationFn: () => installServiceAction(),
       onSuccess: async (success) => {
         if (success) {
           console.log("Service installed and restarted successfully");
-          await refetchRunningMode();
+          await refetchIsServiceAvailable();
           await toggleConnectionCommand();
         }
       },
     });
-
-  const isTunAvailable = isServiceMode || isAdminMode;
 
   const updateLocalStatus = async () => {
     try {
@@ -86,19 +97,17 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     await refetchConnectionMode();
   }, []);
 
-  async function toggleConnection(e: MouseEvent) {
+  async function handlerClickToggleConnection(e: MouseEvent) {
     e.preventDefault();
-    const isConnecting = !isEnabledSystemProxy && !isEnabledTunMode;
-
     if (
-      isConnecting &&
+      connectionState === "disconnected" &&
       (connectionMode === "tun" || connectionMode === "combine") &&
-      (isSidecarMode || !isTunAvailable)
+      !isServiceAvailable
     ) {
       installService();
       return;
     }
-    await toggleConnectionCommand();
+    toggleConnection();
   }
 
   async function handlerChangeConnectionMode(e: ChangeEvent<HTMLInputElement>) {
@@ -106,7 +115,17 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     await refetchConnectionMode();
     localStorage.setItem(LOCAL_STORAGE_TAB_KEY, e.target.value);
 
-    if (isEnabledSystemProxy || isEnabledTunMode) {
+    if (
+      connectionState === "connected" &&
+      (e.target.value === "tun" || e.target.value === "combine") &&
+      !isServiceAvailable
+    ) {
+      await disconnectCommand();
+      installService();
+      return;
+    }
+
+    if (connectionState === "connected") {
       await updateProxyState({
         enable_system_proxy:
           e.target.value === "combine" ||
@@ -123,9 +142,10 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
     }
   }
 
-  const isSidecarMode = runningMode === "Sidecar";
-
-  const isConnecting = isPendingConnecting || connectionState == "connecting";
+  const isConnecting =
+    isPendingConnecting ||
+    connectionState == "connecting" ||
+    isPendingToggleConnection;
 
   return (
     <div className={styles.connectionWidget}>
@@ -136,7 +156,7 @@ export function ConnectionWidget({}: ConnectionButtonProps): React.ReactElement 
           connectionState === "connected" &&
             styles.connectionWidgetButtonConnected,
         )}
-        onClick={toggleConnection}
+        onClick={handlerClickToggleConnection}
         disabled={isConnecting || isPendingInstallService}
       >
         <Icon

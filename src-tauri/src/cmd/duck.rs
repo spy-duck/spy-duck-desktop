@@ -16,6 +16,12 @@ pub fn toggle_connection() -> CmdResult<()> {
 }
 
 #[tauri::command]
+pub fn disconnect() -> CmdResult<()> {
+    duck::disconnect();
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn set_connection_mode(mode: String) -> CmdResult<String> {
     Ok(duck::set_connection_mode(mode)
         .unwrap()

@@ -9,6 +9,7 @@ type ListItemProps = {
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
   onClickContextButton?: MouseEventHandler<HTMLButtonElement>;
   current?: boolean;
+  disabled?: boolean;
   contextMenuItems?: ContextMenuItem[];
   color?: undefined | "red";
   className?: ClassValue;
@@ -21,17 +22,20 @@ export function ListItem({
   color,
   onClick,
   subTitle,
+  disabled,
 }: ListItemProps) {
   const InnerTag = onClick ? "button" : "div";
-  const innerProps: Partial<ComponentProps<any>> = onClick ? { onClick } : {};
+  const innerProps: Partial<ComponentProps<any>> =
+    onClick && !disabled ? { onClick } : {};
   return (
     <li
       className={clsx(
         styles.listItem,
         className,
         current && styles.listItemCurrent,
+        disabled && styles.listItemDisabled,
         color,
-        !!onClick && styles.listItemClickable,
+        !!onClick && !disabled && styles.listItemClickable,
       )}
     >
       <InnerTag className={styles.listItemInner} {...innerProps}>

@@ -148,5 +148,11 @@
         color: var(--grey-500);
       }
     }
+
+    &--disabled {
+      & > #{$item}-inner > #{$item}-title {
+        color: var(--grey-400) !important;
+      }
+    }
   }
 }

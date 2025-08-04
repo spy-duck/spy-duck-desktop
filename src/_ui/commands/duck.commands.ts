@@ -12,6 +12,9 @@ export const setConnectionModeCommand = (
 export const toggleConnectionCommand = (): Promise<void> =>
   invoke<void>("toggle_connection");
 
+export const disconnectCommand = (): Promise<void> =>
+  invoke<void>("disconnect");
+
 export const setCurrentProxyCommand = (
   group: string,
   proxy: string,

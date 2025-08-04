@@ -112,6 +112,18 @@ pub fn is_connected() -> bool {
     *system_proxy || *tun_mode
 }
 
+async fn close_all_connections() {
+    let manager = MihomoManager::global();
+    match manager.close_all_connections().await {
+        Ok(_) => {
+            log::info!(target: "app", "Connections closed successfully");
+        }
+        Err(err) => {
+            log::error!(target: "app", "Failed to close all connections: {err}");
+        }
+    }
+}
+
 pub fn toggle_connection() -> Result<()> {
     let connection_mode = get_connection_mode()?;
 
@@ -156,6 +168,9 @@ pub fn toggle_connection() -> Result<()> {
         .await
         {
             Ok(_) => {
+                if is_connected {
+                    close_all_connections().await;
+                }
                 handle::Handle::refresh_verge();
                 send_event(
                     EVENT_CHANGE_CONNECTION_STATE,
@@ -194,6 +209,7 @@ pub fn disconnect() {
         .await
         .is_ok()
         {
+            close_all_connections().await;
             handle::Handle::refresh_verge();
             send_event(
                 EVENT_CHANGE_CONNECTION_STATE,
@@ -285,14 +301,7 @@ pub async fn set_current_proxy(group: String, proxy: String) -> Result<(), Strin
             );
 
             if is_connected() {
-                match manager.close_all_connections().await {
-                    Ok(_) => {
-                        log::info!(target: "app", "Connections closed successfully");
-                    }
-                    Err(err) => {
-                        log::error!(target: "app", "Failed to close all connections: {err}");
-                    }
-                }
+                close_all_connections().await;
             }
             Ok(())
         }

@@ -319,6 +319,7 @@ pub fn run() {
             cmd::get_connection_mode,
             cmd::set_connection_mode,
             cmd::toggle_connection,
+            cmd::disconnect,
             cmd::set_current_proxy,
         ]);
 

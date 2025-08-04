@@ -1,22 +1,30 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { mutate } from "swr";
+import { check as checkUpdate } from "@tauri-apps/plugin-updater";
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { Modal, ModalProps, useModal } from "@ui/components/modal";
 import { Flex } from "@ui/components/flex";
 import { Switch } from "@ui/components/switch";
 import { useVerge } from "@/hooks/use-verge";
 import { List, ListItem } from "@/_ui/components/list";
 import { showNotice } from "@/services/noticeService";
-import { mutate } from "swr";
 import { useSystemState } from "@/hooks/use-system-state";
-import { confirm } from "@tauri-apps/plugin-dialog";
 import { useLogout } from "@ui/hooks/use-logout";
-import { exitApp, uninstallService } from "@/services/cmds";
-import { check as checkUpdate } from "@tauri-apps/plugin-updater";
+import {
+  exitApp,
+  isServiceAvailable as isServiceAvailableCommand,
+  restartCore as restartCoreCommand,
+  uninstallService as uninstallServiceCommand,
+} from "@/services/cmds";
 import { DialogRef } from "@/components/base";
 import { UpdateViewer } from "@/components/setting/mods/update-viewer";
-import { useTranslation } from "react-i18next";
 import { useClashInfo } from "@/hooks/use-clash";
 import { PortSettingsModal } from "@ui/widgets/settings-modal-widget/port-settings-modal";
 import { updateGeoData } from "@/services/api";
+import { disconnectCommand } from "@ui/commands/duck.commands";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Spinner } from "@ui/components/spinner";
 
 type SettingsModalWidgetProps = ModalProps;
 
@@ -31,6 +39,43 @@ export function SettingsModalWidget({
   const { enable_auto_launch } = verge ?? {};
   const updateRef = useRef<DialogRef>(null);
   const { show: showPortSettings, props: portSettingsProps } = useModal();
+
+  const { data: isServiceAvailable, refetch: refetchIsServiceAvailable } =
+    useQuery({
+      queryKey: ["isServiceAvailable"],
+      queryFn: () => isServiceAvailableCommand(),
+    });
+
+  useEffect(() => {
+    if (modalProps.open) {
+      refetchIsServiceAvailable();
+    }
+  }, [modalProps.open]);
+
+  const { mutate: restartCore, isPending: isPendingRestartCore } = useMutation({
+    mutationFn: () => {
+      return restartCoreCommand();
+    },
+    onSuccess: () => {
+      showNotice("success", t("Clash Core Restarted"));
+    },
+    onError: (err: any) => {
+      showNotice("error", err?.response.data.message || err.toString());
+    },
+  });
+
+  const { mutate: uninstallService, isPending: isPendingUninstallService } =
+    useMutation({
+      mutationFn: () => {
+        return uninstallServiceCommand();
+      },
+      onSuccess: () => {
+        showNotice("success", t("Service Uninstalled Successfully"));
+      },
+      onError: (err: any) => {
+        showNotice("error", err?.response.data.message || err.toString());
+      },
+    });
 
   async function handlerClickLogout(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
@@ -108,12 +153,19 @@ export function SettingsModalWidget({
       })
     ) {
       try {
-        await uninstallService();
-        showNotice("success", t("Service Uninstalled Successfully"));
+        await disconnectCommand();
+        uninstallService();
       } catch (err: any) {
         showNotice("error", err?.response.data.message || err.toString());
       }
     }
+  }
+
+  async function handlerClickRestartService(
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) {
+    e.preventDefault();
+    restartCore();
   }
 
   return (
@@ -152,8 +204,37 @@ export function SettingsModalWidget({
           <ListItem onClick={handlerClickCheckUpdates}>
             Проверить обновление
           </ListItem>
-          <ListItem onClick={handlerClickUninstallService}>
-            Удалить системную службу
+          <ListItem
+            onClick={handlerClickRestartService}
+            disabled={
+              !isServiceAvailable ||
+              isPendingRestartCore ||
+              isPendingUninstallService
+            }
+          >
+            <Flex
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={14}
+            >
+              Перезапустить системную службу
+              {isPendingRestartCore && <Spinner />}
+            </Flex>
+          </ListItem>
+          <ListItem
+            onClick={handlerClickUninstallService}
+            disabled={!isServiceAvailable || isPendingUninstallService}
+          >
+            <Flex
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={14}
+            >
+              Удалить системную службу
+              {isPendingUninstallService && <Spinner />}
+            </Flex>
           </ListItem>
           <ListItem onClick={handlerClickLogout}>Удалить подписку</ListItem>
           <ListItem onClick={handlerClickExit}>Остановить приложение</ListItem>
